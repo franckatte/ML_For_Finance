@@ -102,7 +102,7 @@ def supervised(df,growth_freqs,lead):
         
         Return
         ------------
-        df(pandas df): dataframe
+        (X,y) df(pandas df): regressors, target
     '''
     
     
