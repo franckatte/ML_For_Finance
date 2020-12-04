@@ -73,11 +73,11 @@ def expand_data(dt):
         
          parameters
         ------------
-        dt: pandas df
+        dt(pandas df): dataframe
         
         Return
         ------------
-        df: pandas df
+        df(pandas df): dataframe
     '''
     
     df = dt.copy()
@@ -105,6 +105,8 @@ data = yields_clean.join([df_mcp_clean, df_baro_clean,df_eco_clean] ).dropna()
 col = ['sentiment eu','sentiment ch', 'kofbarometer','kof mpc', '1J', '2J', '3J', '4J', '5J', '6J', '7J', '8J', '9J', '10J', '15J', '20J', '30J']
 
 data = data[col].copy()
+data.columns = ['s_eu','s_ch', 'kof_baro','kof_mpc', '1J', '2J', '3J', '4J', '5J', '6J', '7J', '8J', '9J', '10J', '15J', '20J', '30J']
+data.iloc[:,4:] = data.iloc[:,4:].copy()/100
 
 data.to_csv('/Users/franckatteaka/Desktop/cours/Semester III/ML_for_finance/Data/data_clean.csv')
 
