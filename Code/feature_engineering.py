@@ -90,7 +90,7 @@ def rolling_growth(df,freqs,col, drop = True):
     return df2.iloc[:,-len(freqs):].join(df2.iloc[:,:-len(freqs)])
 
 
-def supervised(df,growth_freqs,lead):
+def supervised(df,growth_freqs,backwards):
     '''
         create supervised learning data for a lead time
         
@@ -98,7 +98,7 @@ def supervised(df,growth_freqs,lead):
         ------------
         df(pandas df): dataframe economic variable and yields 
         growth:_freqs(list): frequences of growth for econommics data
-        lead(int): days between target variables and observed data used to predict
+        backwards(list): days between target variables and observed data used to predict
         
         Return
         ------------
@@ -110,11 +110,12 @@ def supervised(df,growth_freqs,lead):
 
     cols = list(df2.columns)
     cols.reverse()
+    
     for c in cols:
         if 'J' in c:
-            df2 =lag(df2,[lead],c, drop = False)
+            df2 =lag(df2,backwards,c, drop = False)
         else:
-            df2 =lag(df2,[lead],c, drop = True)
+            df2 =lag(df2,backwards,c, drop = True)
             
     df2.dropna(inplace = True)
     
@@ -136,6 +137,28 @@ def supervised(df,growth_freqs,lead):
         
 
     
-X,y = supervised(df,growth_freqs = [30,60],lead=1)
+
+def reshape(X,backwards):
+    
+    backwards2 =  backwards.copy()
+    backwards2.sort(reverse = True)
+    sequence = []
+    
+    for i in backwards2:
+        ticker = "(t-" + str(i) + ")"
+        sequence.append(X.iloc[:,X.columns.str.contains(ticker)].values)
+    
+    nb_obs = sequence[0].shape[0]
+    nb_features= sequence[0].shape[1]
+    time_steps = len(sequence)
+    
+    A = np.zeros(( nb_obs,time_steps,nb_features,))
+    
+    for t_steps in range(len(backwards2)):
+        
+        A[:,t_steps,:] = sequence[t_steps]
+    
+    
+    return A
 
 
