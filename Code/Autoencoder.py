@@ -31,7 +31,7 @@ def yields_plot(X,X_pred):
     terms = ['1J', '2J','3J', '4J', '5J', '6J','7J', '8J', '9J', '10J', '15J', '20J', '30J']
     for  i,term in enumerate(terms):
     
-        X2.loc[:,[term, term + " pred"]].plot()
+        X2.loc[:,[term, term + " pred"]].plot(colors = ['blue','red'])
         plt.show()
         
         
@@ -105,11 +105,12 @@ random_search.best_params_
 
 ## training parameters
 
-learning_rate = 0.01
-epochs = 200
+
+learning_rate = 0.001
+epochs = 500
 encoding_dim = 2
 dropout = 0.5
-batch_size = 200
+batch_size = 50
 activation2 = 'tanh'
 activation1 = 'tanh'
 
@@ -120,9 +121,9 @@ autoencoder =  create_denoising_ae(learning_rate,dropout,encoding_dim,activation
 # summary the model
 autoencoder.summary()
 
-# Define a callbacks
-# monitor_val_loss = EarlyStopping(monitor='val_loss',  patience= 10)
-modelCheckpoint = ModelCheckpoint('best_auto_encoder.hdf5', save_best_only = True)
+# Define a callback
+
+modelCheckpoint = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/ML_For_Finance/Code/models/best_auto_encoder.hdf5',  save_best_only = True)
 
 
 # fit the model
@@ -132,20 +133,20 @@ history = autoencoder.fit(X_train, X_train, epochs=epochs, batch_size=batch_size
                           validation_data=(X_test, X_test),verbose=1)
 
 ## Plot RMSE
-plt.plot(history.epoch, np.array(history.history['loss'])**0.5, label="train")
-plt.plot(history.epoch, np.array(history.history['val_loss'])**0.5, label="test")
+fig_folder = '/Users/franckatteaka/Desktop/cours/Semester III/ML_For_Finance/Code/figures/autoencoder'
+plt.figure(figsize = (10,6))
+plt.plot(history.epoch, np.array(history.history['loss'])**0.5, label="train", color = "blue")
+plt.plot(history.epoch, np.array(history.history['val_loss'])**0.5, label="test", color = "red")
+plt.xlabel("epoch")
+plt.ylabel("RMSE")
 plt.legend()
-
+plt.savefig(fig_folder  + '/train_test_RMSE.pdf')
 plt.show()
 
 # evaluate
 print('\n# Evaluate on test data')
 results = autoencoder.evaluate(X_train, X_train, batch_size=100)
 print('test mse', results)
-
-
-
-
 
 # prediction train
 X_pred = autoencoder.predict(X_train)
@@ -155,7 +156,6 @@ X_pred = pd.DataFrame(X_pred, index = X_train_0.index,columns = columns_preds )
 yields_plot(X_train_0,X_pred)
 
 # prediction test
-
 X_pred = autoencoder.predict(X_test)
 columns_preds = [ i + " pred" for i in list(X_test_0.columns)]
 X_pred = pd.DataFrame(X_pred, index = X_test_0.index,columns = columns_preds )
