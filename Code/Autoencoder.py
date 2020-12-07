@@ -9,12 +9,11 @@ Created on Fri Dec  4 13:19:05 2020
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from feature_engineering import supervised
 from sklearn.model_selection import train_test_split
 
 from keras.layers import Input, Dense, Dropout
 from keras.models import Model
-from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras.callbacks import ModelCheckpoint
 from keras.wrappers.scikit_learn import KerasRegressor
 from keras.optimizers import Adam
 from sklearn.model_selection import RandomizedSearchCV, KFold
@@ -23,22 +22,6 @@ from sklearn.model_selection import RandomizedSearchCV, KFold
 # import data
 df = df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/ML_for_finance/Data/data_clean.csv',sep = ","
                  ,parse_dates = True,index_col = 0 )
-
-#  plot function
-def yields_plot(X,X_pred):
-    
-    X2 = X.join(X_pred)
-    terms = ['1J', '2J','3J', '4J', '5J', '6J','7J', '8J', '9J', '10J', '15J', '20J', '30J']
-    for  i,term in enumerate(terms):
-    
-        X2.loc[:,[term, term + " pred"]].plot(colors = ['blue','red'])
-        plt.show()
-        
-        
-        
-    
-
-
 
 
 X = df.iloc[:,df.columns.str.contains('J')]
@@ -132,6 +115,7 @@ history = autoencoder.fit(X_train, X_train, epochs=epochs, batch_size=batch_size
                           callbacks = [modelCheckpoint],
                           validation_data=(X_test, X_test),verbose=1)
 
+
 ## Plot RMSE
 fig_folder = '/Users/franckatteaka/Desktop/cours/Semester III/ML_For_Finance/Code/figures/autoencoder'
 plt.figure(figsize = (10,6))
@@ -148,19 +132,34 @@ print('\n# Evaluate on test data')
 results = autoencoder.evaluate(X_train, X_train, batch_size=100)
 print('test mse', results)
 
+
+#  plot function
+def yields_plot(X,X_pred,folder, ticker):
+    
+    X2 = X.join(X_pred)
+    terms = ['1J', '2J','3J', '4J', '5J', '6J','7J', '8J', '9J', '10J', '15J', '20J', '30J']
+    
+    for  i,term in enumerate(terms):
+        plt.figure(figsize = (10,6))
+        X2.loc[:,[term, term + " pred"]].plot( color = ['blue','red'])
+        plt.ylabel("yields")
+        plt.savefig(folder + "/" + "obs_pred-" + ticker + "-" + term + ".pdf")
+        plt.show()
+
+
 # prediction train
 X_pred = autoencoder.predict(X_train)
 columns_preds = [ i + " pred" for i in list(X_train_0.columns)]
 X_pred = pd.DataFrame(X_pred, index = X_train_0.index,columns = columns_preds )
 
-yields_plot(X_train_0,X_pred)
+yields_plot(X_train_0,X_pred,fig_folder,"train")
 
 # prediction test
 X_pred = autoencoder.predict(X_test)
 columns_preds = [ i + " pred" for i in list(X_test_0.columns)]
 X_pred = pd.DataFrame(X_pred, index = X_test_0.index,columns = columns_preds )
 
-yields_plot(X_test_0,X_pred)
+yields_plot(X_test_0,X_pred,fig_folder,"test")
 
 
 
