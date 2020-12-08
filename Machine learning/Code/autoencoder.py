@@ -20,7 +20,7 @@ from sklearn.model_selection import RandomizedSearchCV, KFold
 
 
 # import data
-df = df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/ML_for_finance/Data/data_clean.csv',sep = ","
+df = df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv',sep = ","
                  ,parse_dates = True,index_col = 0 )
 
 
@@ -106,7 +106,7 @@ autoencoder.summary()
 
 # Define a callback
 
-modelCheckpoint = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/ML_For_Finance/Code/models/best_auto_encoder.hdf5',  save_best_only = True)
+modelCheckpoint = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_auto_encoder.hdf5',  save_best_only = True)
 
 
 # fit the model
@@ -117,7 +117,7 @@ history = autoencoder.fit(X_train, X_train, epochs=epochs, batch_size=batch_size
 
 
 ## Plot RMSE
-fig_folder = '/Users/franckatteaka/Desktop/cours/Semester III/ML_For_Finance/Code/figures/autoencoder'
+fig_folder = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/figures/autoencoder'
 plt.figure(figsize = (10,6))
 plt.plot(history.epoch, np.array(history.history['loss'])**0.5, label="train", color = "blue")
 plt.plot(history.epoch, np.array(history.history['val_loss'])**0.5, label="test", color = "red")
@@ -148,6 +148,7 @@ def yields_plot(X,X_pred,folder, ticker):
 
 
 # prediction train
+
 X_pred = autoencoder.predict(X_train)
 columns_preds = [ i + " pred" for i in list(X_train_0.columns)]
 X_pred = pd.DataFrame(X_pred, index = X_train_0.index,columns = columns_preds )

@@ -14,13 +14,11 @@ import datetime
 
 
 # raw data files paths
-allxlsx = glob.glob('/Users/franckatteaka/Desktop/cours/Semester III/ML_for_finance/Data/*.xlsx')
-csv = glob.glob('/Users/franckatteaka/Desktop/cours/Semester III/ML_for_finance/Data/*yields_raw.csv')
+allxlsx = glob.glob('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/*.xlsx')
+csv = glob.glob('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/*yields_raw.csv')
 
 
 # yields data cleaning
-
-
 yields_raw = pd.read_csv(csv[0],sep = ";",skiprows = 3,parse_dates = True,index_col = 0 )
 
 # remove exchange closed days ()
@@ -40,8 +38,6 @@ yields_clean = yields_clean.pivot(index='Date', columns='D0', values='Value')
 
 
 # economic sentiment data cleaning
-
-
 df_eco_raw = pd.read_excel(allxlsx[0],parse_dates = True,index_col = 0 )
 df_eco_raw.columns = ['sentiment ch','sentiment eu']
 df_eco_raw = df_eco_raw.dropna().copy()
@@ -49,15 +45,11 @@ df_eco_raw = df_eco_raw.dropna().copy()
 
 
 # barometer data cleaning
-
-
 df_baro_raw = pd.read_excel(allxlsx[1],parse_dates = True,index_col = 0 )
 
 
 
 # mcp data cleaning
-
-
 df_mcp_raw = pd.read_excel(allxlsx[2],parse_dates = True,index_col = 0 )
 df_mcp_raw.columns = ['kof mpc']
 df_mcp_raw = df_mcp_raw.dropna().copy()
@@ -65,8 +57,6 @@ df_mcp_raw = df_mcp_raw.dropna().copy()
 
 
 #  economic data upsampling: from monthly to daily data
-
-
 def expand_data(dt):
     '''
         Upsample the dataframe to daily data
@@ -97,8 +87,6 @@ df_eco_clean = expand_data(df_eco_raw)
 
 
 # clean data 
-
-
 data = yields_clean.join([df_mcp_clean, df_baro_clean,df_eco_clean] ).dropna()
 
 # ordered columns
@@ -108,7 +96,7 @@ data = data[col].copy()
 data.columns = ['s_eu','s_ch', 'kof_baro','kof_mpc', '1J', '2J', '3J', '4J', '5J', '6J', '7J', '8J', '9J', '10J', '15J', '20J', '30J']
 data.iloc[:,4:] = data.iloc[:,4:].copy()/100
 
-data.to_csv('/Users/franckatteaka/Desktop/cours/Semester III/ML_for_finance/Data/data_clean.csv')
+data.to_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv')
 
 
 

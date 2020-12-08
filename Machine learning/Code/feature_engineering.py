@@ -10,13 +10,10 @@ Created on Tue Dec  1 20:08:01 2020
 
 import pandas as pd
 import numpy as np
-import datetime
 
 
-df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/ML_for_finance/Data/data_clean.csv',sep = ","
+df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv',sep = ","
                  ,parse_dates = True,index_col = 0 )
-
-
 
 
 def sub_range(df,nb_years = None):
@@ -34,8 +31,6 @@ def sub_range(df,nb_years = None):
         df(pandas df): dataframe
 
     '''
-    
-  
     
     # most recent date
     last = df.index.date.max()
@@ -130,12 +125,11 @@ def supervised(df,growth_freqs,backwards):
     
     df2 = df2.dropna()
     
+    X = df2.iloc[:,:-13].copy()
     
+    y = df2.iloc[:,-13:].copy()
     
-    return df2.iloc[:,:-13] ,df2.iloc[:,-13:]
-    
-        
-
+    return X,y
     
 
 def reshape(X,backwards):
@@ -157,7 +151,6 @@ def reshape(X,backwards):
     for t_steps in range(len(backwards2)):
         
         A[:,t_steps,:] = sequence[t_steps]
-    
     
     return A
 
