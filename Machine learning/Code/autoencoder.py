@@ -18,7 +18,6 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from keras.optimizers import Adam
 from sklearn.model_selection import RandomizedSearchCV, KFold
 
-
 # import data
 df = df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv',sep = ","
                  ,parse_dates = True,index_col = 0 )
@@ -79,9 +78,9 @@ random_search = RandomizedSearchCV(model, param_distributions = params, cv = KFo
 
 # =============================================================================
 # Pour Corentin
-# from ts_cross_validation import CPCV
+# from tscpcv import CPCV
 # 
-# cpcv2 = CPCV(X_train_0, X_train_0, n_split = 4, n_folds = 2, purge = 1, embargo = 0)
+# cpcv = CPCV(X_train_0, X_train_0, n_split = 4, n_folds = 2, purge = 1, embargo = 0)
 # 
 # # Create a randomize search cv object passing in the parameters to try
 # random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv)
