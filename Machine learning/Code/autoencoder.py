@@ -25,15 +25,13 @@ df = df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses P
 
 
 X = df.iloc[:,df.columns.str.contains('J')]
-X_train_0, X_test_0 = train_test_split(X, test_size = 0.2)
+X_train_0, X_test_0 = train_test_split(X, test_size = 0.2,shuffle = False)
 
 X_train, X_test = X_train_0.to_numpy(), X_test_0.to_numpy()
 
 ## model dimension
 input_dim = X_train.shape[1]
 output_dim = X_train.shape[1]
-
-
 
 
 
@@ -68,8 +66,6 @@ def create_denoising_ae(learning_rate, dropout,encoding_dim,activation1,activati
     return autoencoder
     
     
-
-
 # Create a KerasRegressor
 model = KerasRegressor(build_fn = create_denoising_ae)
 
@@ -79,6 +75,18 @@ params = {'encoding_dim':[1,2],'activation1': ['sigmoid', 'tanh'],'activation2':
 
 # Create a randomize search cv object passing in the parameters to try
 random_search = RandomizedSearchCV(model, param_distributions = params, cv = KFold(5))
+
+
+# =============================================================================
+# Pour Corentin
+# from ts_cross_validation import CPCV
+# 
+# cpcv2 = CPCV(X_train_0, X_train_0, n_split = 4, n_folds = 2, purge = 1, embargo = 0)
+# 
+# # Create a randomize search cv object passing in the parameters to try
+# random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv)
+# 
+# =============================================================================
 
 # Search for best combinations
 random_search.fit(X_train,X_train)
