@@ -80,7 +80,7 @@ params = {'encoding_dim':[1,2],'activation1': ['sigmoid', 'tanh'],'activation2':
 cpcv = CPCV(X_train_0, X_train_0, n_split = 6, n_folds = 2, purge = 0, embargo = 0)
 
 # Create a randomize search cv object passing in the parameters to try
-random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv)
+random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv,n_jobs=3)
 
 
 # Search for best combinations
@@ -91,16 +91,6 @@ random_search.best_params_
 
 ## training parameters
 
-
-learning_rate = 0.001
-epochs = 500
-encoding_dim = 2
-dropout = 0.5
-batch_size = 50
-activation2 = 'tanh'
-activation1 = 'tanh'
-# 6.6108e-07
-
 learning_rate = 0.001
 epochs = 500
 encoding_dim = 2
@@ -108,7 +98,16 @@ dropout = 0.4
 batch_size = 100
 activation2 = 'linear'
 activation1 = 'tanh'
+# 7.8373e-07
 
+learning_rate = 0.01
+epochs = 50
+encoding_dim = 2
+dropout = 0.4
+batch_size = 200
+activation2 = 'linear'
+activation1 = 'tanh'
+# 7.8373e-07
 
 # create model
 autoencoder =  create_denoising_ae(learning_rate,dropout,encoding_dim,activation1,activation2)

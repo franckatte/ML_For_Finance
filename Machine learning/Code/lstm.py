@@ -32,7 +32,7 @@ df.iloc[:,~df.columns.str.contains('J')] = df.iloc[:,~df.columns.str.contains('J
 # 
 times = [1,2,3]
 # create features and transform the data in the supervised format
-X,y = supervised(df,growth_freqs = [30,60],backwards = times)
+X,y = supervised(df,growth_freqs = [20,40],backwards = times)
 
 # reshape the data  
 X = reshape(X,backwards = times)
