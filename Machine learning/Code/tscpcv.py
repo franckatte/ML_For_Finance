@@ -70,7 +70,7 @@ def test_groups(train_groups,groups_ids):
     return res
 
 
-def CPCV(X,Y,n_split,n_folds,purge,embargo):
+def CPCV(X,n_split,n_folds,purge,embargo):
     
     X2 = X.copy()
  

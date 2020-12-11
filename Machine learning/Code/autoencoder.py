@@ -16,7 +16,7 @@ from keras.models import Model
 from keras.callbacks import ModelCheckpoint
 from keras.wrappers.scikit_learn import KerasRegressor
 from keras.optimizers import Adam
-from sklearn.model_selection import RandomizedSearchCV, KFold
+from sklearn.model_selection import RandomizedSearchCV
 from tscpcv import CPCV
 
 # import data
@@ -71,16 +71,16 @@ model = KerasRegressor(build_fn = create_denoising_ae)
 
 # Define the parameters to try out
 params = {'encoding_dim':[1,2],'activation1': ['sigmoid', 'tanh'],'activation2':['linear', 'tanh'],'batch_size': [10,50, 100, 200],
-          'learning_rate': [0.1, 0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.3,0.4,0.5]}
+          'learning_rate': [0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.4,0.5]}
 
 # Create a randomize search cv object passing in the parameters to try
 #random_search = RandomizedSearchCV(model, param_distributions = params, cv = KFold(5))
 
 # create the CPCV folds indexes
-cpcv = CPCV(X_train_0, X_train_0, n_split = 6, n_folds = 2, purge = 0, embargo = 0)
+cpcv = CPCV(X_train_0, n_split = 6, n_folds = 2, purge = 0, embargo = 0)
 
 # Create a randomize search cv object passing in the parameters to try
-random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv,n_jobs=3)
+random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv,n_jobs = 4,n_iter = 20)
 
 
 # Search for best combinations
@@ -94,20 +94,11 @@ random_search.best_params_
 learning_rate = 0.001
 epochs = 500
 encoding_dim = 2
-dropout = 0.4
+dropout = 0.5
 batch_size = 100
 activation2 = 'linear'
 activation1 = 'tanh'
-# 7.8373e-07
-
-learning_rate = 0.01
-epochs = 50
-encoding_dim = 2
-dropout = 0.4
-batch_size = 200
-activation2 = 'linear'
-activation1 = 'tanh'
-# 7.8373e-07
+# 4.329401294704847e-07
 
 # create model
 autoencoder =  create_denoising_ae(learning_rate,dropout,encoding_dim,activation1,activation2)
@@ -122,9 +113,9 @@ modelCheckpoint = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours
 
 # fit the model
 
-history = autoencoder.fit(X_train, X_train, epochs=epochs, batch_size=batch_size, shuffle=True, 
+history = autoencoder.fit(X_train, X_train, epochs = epochs, batch_size = batch_size, shuffle = True, 
                           callbacks = [modelCheckpoint],
-                          validation_data=(X_test, X_test),verbose=1)
+                          validation_data=(X_test, X_test),verbose = 1)
 
 
 ## Plot RMSE
