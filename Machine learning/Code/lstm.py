@@ -13,26 +13,25 @@ import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import RandomizedSearchCV
-from keras.layers import Input, Dense, LSTM, Dropout
+from keras.layers import Input, Dense, LSTM, Dropout,Bidirectional
 from keras.models import Model
 from keras.callbacks import ModelCheckpoint
 from keras.wrappers.scikit_learn import KerasRegressor
 from keras.optimizers import Adam
-
-from sklearn import preprocessing
+from keras.models import load_model
 from tscpcv import CPCV
 
 
 df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv',sep = ","
                  ,parse_dates = True,index_col = 0 )
 
-# scale economic variables
-df.iloc[:,~df.columns.str.contains('J')] = df.iloc[:,~df.columns.str.contains('J')].apply(preprocessing.scale).copy()
 
 # 
 times = [1,2,3]
 # create features and transform the data in the supervised format
-X,y = supervised(df,growth_freqs = [20,40,60],backwards = times)
+m_path = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_auto_encoder.hdf5'
+X,y = supervised(df,growth_freqs = [20,40,60],backwards = times, scale_eco = True,denoise = True,model_path = m_path)
+
 
 # reshape the data  
 X = reshape(X,backwards = times)
@@ -89,7 +88,7 @@ def stacked_LSTM(learning_rate,size1,size2,dropout,encoding_dim,activation1,acti
 
     return lstm.compile(optimizer = opt, loss = 'mean_squared_error')
 
-def bi_LSTM(learning_rate,size1,size2,dropout,encoding_dim,activation1,activation2,activation3):
+def bi_LSTM(learning_rate,size,dropout,encoding_dim,activation1,activation2):
     # Create an Adam optimizer with the given learning rate
     opt = Adam(lr = learning_rate)
     # input data
@@ -99,8 +98,7 @@ def bi_LSTM(learning_rate,size1,size2,dropout,encoding_dim,activation1,activatio
     Dropout(dropout)(input_layer)
     
     # hidden layers
-    hidden =  LSTM(size1 , activation = activation1, return_sequences=True)(input_layer)
-    hidden =  LSTM(size2 , activation = activation2,)(hidden)
+    hidden =  Bidirectional(LSTM(size1 , activation = activation1, return_sequences=True))(input_layer)
     
     # output layer
     output_layer = Dense(output_dim, activation = activation3)(hidden)
@@ -110,21 +108,34 @@ def bi_LSTM(learning_rate,size1,size2,dropout,encoding_dim,activation1,activatio
 
     return lstm.compile(optimizer = opt, loss = 'mean_squared_error')
 
+
+### vanilla lstm
+
 # Create a KerasRegressor
-model = KerasRegressor(build_fn = vanilla_LSTM)
+lstm1 = KerasRegressor(build_fn = vanilla_LSTM)
 
 # Define the parameters to try out
-params = {'size':[1,2],'activation1': ['softmax','sigmoid', 'tanh'],'activation2':['linear', 'tanh'],'batch_size': [10,50, 100, 200],
-          'learning_rate': [ 0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.3,0.4,0.5]}
+params = {'size':[1,2],'activation1': ['softmax','sigmoid', 'tanh'],'activation2': ['softmax','sigmoid', 'tanh'],'activation3':['linear', 'tanh'],
+          'batch_size': [10,50, 100, 200],'learning_rate': [ 0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.1,0.2,0.3]}
 
 
-cv = CPCV(X, n_split = 6, n_folds = 2, purge = 20, embargo = 1, backwards = times)
+cv = CPCV(X, n_split = 6, n_folds = 2, purge = 60, embargo = 1, backwards = times)
+
+# Create a randomize search cv object passing in the parameters to try
+random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv,n_jobs = 4)
+
+
+# Search for best combinations
+random_search.fit(X_train,X_train)
+
+# results
+random_search.best_params_
+
+## training parameters
 
 
 history = lstm.fit(X_train, y_train, epochs = 500, batch_size= 200, 
                           validation_data=(X_test, y_test),verbose=1)
-
-
 
 plt.figure(figsize = (10,6))
 plt.plot(history.epoch, np.array(history.history['loss'])**0.5, label="train", color = "blue")

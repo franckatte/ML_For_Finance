@@ -73,14 +73,12 @@ model = KerasRegressor(build_fn = create_denoising_ae)
 params = {'encoding_dim':[1,2],'activation1': ['sigmoid', 'tanh'],'activation2':['linear', 'tanh'],'batch_size': [10,50, 100, 200],
           'learning_rate': [0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.4,0.5]}
 
-# Create a randomize search cv object passing in the parameters to try
-#random_search = RandomizedSearchCV(model, param_distributions = params, cv = KFold(5))
 
 # create the CPCV folds indexes
 cpcv = CPCV(X_train_0, n_split = 6, n_folds = 2, purge = 0, embargo = 0)
 
 # Create a randomize search cv object passing in the parameters to try
-random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv,n_jobs = 4,n_iter = 20)
+random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv,n_jobs = 4, n_iter = 20)
 
 
 # Search for best combinations
@@ -98,7 +96,6 @@ dropout = 0.5
 batch_size = 100
 activation2 = 'linear'
 activation1 = 'tanh'
-# 4.329401294704847e-07
 
 # create model
 autoencoder =  create_denoising_ae(learning_rate,dropout,encoding_dim,activation1,activation2)
@@ -107,12 +104,9 @@ autoencoder =  create_denoising_ae(learning_rate,dropout,encoding_dim,activation
 autoencoder.summary()
 
 # Define a callback
-
 modelCheckpoint = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_auto_encoder.hdf5',  save_best_only = True)
 
-
 # fit the model
-
 history = autoencoder.fit(X_train, X_train, epochs = epochs, batch_size = batch_size, shuffle = True, 
                           callbacks = [modelCheckpoint],
                           validation_data=(X_test, X_test),verbose = 1)
@@ -134,7 +128,6 @@ print('\n# Evaluate on test data')
 results = autoencoder.evaluate(X_train, X_train, batch_size=100)
 print('test mse', results)
 
-
 #  plot function
 def yields_plot(X,X_pred,folder, ticker):
     
@@ -148,9 +141,7 @@ def yields_plot(X,X_pred,folder, ticker):
         plt.savefig(folder + "/" + "obs_pred-" + ticker + "-" + term + ".pdf")
         plt.show()
 
-
 # prediction train
-
 X_pred = autoencoder.predict(X_train)
 columns_preds = [ i + " pred" for i in list(X_train_0.columns)]
 X_pred = pd.DataFrame(X_pred, index = X_train_0.index,columns = columns_preds )

@@ -10,7 +10,8 @@ Created on Tue Dec  1 20:08:01 2020
 
 import pandas as pd
 import numpy as np
-
+from sklearn import preprocessing
+from keras.models import load_model
 
 df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv',sep = ","
                  ,parse_dates = True,index_col = 0 )
@@ -85,7 +86,22 @@ def rolling_growth(df,freqs,col, drop = True):
     return df2.iloc[:,-len(freqs):].join(df2.iloc[:,:-len(freqs)])
 
 
-def supervised(df,growth_freqs,backwards):
+
+def denoiser(df,backwards,model_path):
+    
+    autoencoder = load_model(model_path)
+    df2 = df.iloc[:,df.columns.str.contains('J')]
+    print(df2)
+    for l in backwards:
+        name =  "(t-" + str(l) + ")"
+        df2.iloc[:,df2.columns.str.contains(name)] = autoencoder.predict(df2.iloc[:,df2.columns.str.contains(name)].to_numpy())
+    
+    return df2
+        
+
+    
+    
+def supervised(df,growth_freqs,backwards,denoise = True,model_path = None,scale_eco = True):
     '''
         create supervised learning data for a lead time
         
@@ -94,7 +110,9 @@ def supervised(df,growth_freqs,backwards):
         df(pandas df): dataframe economic variable and yields 
         growth:_freqs(list): frequences of growth for econommics data
         backwards(list): days between target variables and observed data used to predict
-        
+        denoise(Bool): True if we want to denoise the yields
+        model_path(str): path of the keras denoising model 
+        scale_eco(Bool): True if we want the economic variables to be scaled
         Return
         ------------
         (X,y) df(pandas df): regressors, target
@@ -102,6 +120,8 @@ def supervised(df,growth_freqs,backwards):
     
     
     df2 = df.copy()
+    if scale_eco == True:
+        df2.iloc[:,~df2.columns.str.contains('J')] = df2.iloc[:,~df2.columns.str.contains('J')].apply(preprocessing.scale).copy()
 
     cols = list(df2.columns)
     cols.reverse()
@@ -128,6 +148,10 @@ def supervised(df,growth_freqs,backwards):
     X = df2.iloc[:,:-13].copy()
     
     y = df2.iloc[:,-13:].copy()
+    
+    if denoise == True:
+        
+        X = denoiser(X,backwards,model_path)
     
     return X,y
     
