@@ -164,12 +164,16 @@ print('\n# Evaluate on test data')
 results = lstm_vanilla.evaluate(X_test, y_test, batch_size=100)
 print('test mse', results)
 
+
+fig_folder = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/figures/LSTM'
+
 plt.figure(figsize = (10,6))
 plt.plot(history1.epoch, np.array(history1.history['loss'])**0.5, label="train", color = "blue")
 plt.plot(history1.epoch, np.array(history1.history['val_loss'])**0.5, label="test", color = "red")
 plt.xlabel("epoch")
 plt.ylabel("RMSE")
 plt.legend()
+plt.savefig(fig_folder  + '/vanilla_train_test_RMSE.pdf')
 plt.show()
 
 
@@ -185,7 +189,7 @@ params2 = {'size':[1,10,50,100],'activation1': ['softmax'],'activation2': ['line
 
 
 # Create a randomize search cv object passing in the parameters to try
-random_search2 = RandomizedSearchCV(lstm2, param_distributions = params1, cv = cpcv,n_jobs = 4)
+random_search2 = RandomizedSearchCV(lstm2, param_distributions = params2, cv = cpcv,n_jobs = 4)
 
 # Search for best combinations
 random_search2.fit(X_train,y_train)
@@ -213,25 +217,80 @@ lstm_stacked =  stacked_LSTM(learning_rate,size1,size2,dropout,activation1,activ
 modelCheckpoint1 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_vanilla_lstm.hdf5',  save_best_only = True)
 
 
-history1 = lstm_vanilla.fit(X_train, y_train,epochs, batch_size, 
+history2 = lstm_stacked.fit(X_train, y_train,epochs, batch_size, 
                           validation_data=(X_test, y_test),callbacks = [modelCheckpoint1],verbose=1)
 
 # evaluate
 print('\n# Evaluate on test data')
-results = lstm_vanilla.evaluate(X_test, y_test, batch_size=100)
+results = lstm_stacked.evaluate(X_test, y_test, batch_size=100)
 print('test mse', results)
 
 
 
 
 plt.figure(figsize = (10,6))
-plt.plot(history.epoch, np.array(history.history['loss'])**0.5, label="train", color = "blue")
-plt.plot(history.epoch, np.array(history.history['val_loss'])**0.5, label="test", color = "red")
+plt.plot(history2.epoch, np.array(history2.history['loss'])**0.5, label="train", color = "blue")
+plt.plot(history2.epoch, np.array(history2.history['val_loss'])**0.5, label="test", color = "red")
 plt.xlabel("epoch")
 plt.ylabel("RMSE")
 plt.legend()
+plt.savefig(fig_folder  + '/stacked_train_test_RMSE.pdf')
 plt.show()
-params = {'size':[1,2],'activation1': ['softmax','sigmoid', 'tanh'],'activation2': ['softmax','sigmoid', 'tanh'],'activation3':['linear', 'tanh'],
-          'batch_size': [10,50, 100, 200],'learning_rate': [ 0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.1,0.2,0.3]}
 
 
+
+
+### bidirectional LSTM
+
+# Create a KerasRegressor
+lstm3 = KerasRegressor(build_fn = stacked_LSTM)
+
+# Define the parameters to try out
+params3 = {'size':[1,10,50,100],'activation1': ['softmax'],'activation2': ['linear', 'tanh']
+           ,'batch_size': [10,50, 100, 200],'learning_rate': [0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.1,0.2,0.3]}
+
+
+# Create a randomize search cv object passing in the parameters to try
+random_search3 = RandomizedSearchCV(lstm3, param_distributions = params3, cv = cpcv,n_jobs = 4)
+
+# Search for best combinations
+random_search3.fit(X_train,y_train)
+
+# results
+random_search3.best_params_
+
+
+## training parameters
+learning_rate = 0.01
+size = 50
+epochs = 200
+dropout = 0.2
+batch_size = 50
+activation1 = 'softmax'
+activation2 = 'linear'
+
+# create model
+
+lstm_bidirect =  bi_LSTM(learning_rate,size,dropout,activation1,activation2)
+
+# checkpoint
+modelCheckpoint3 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_bidirectional_lstm.hdf5',  save_best_only = True)
+
+
+history3 = lstm_bidirect.fit(X_train, y_train,epochs, batch_size, 
+                          validation_data=(X_test, y_test),callbacks = [modelCheckpoint3],verbose=1)
+
+# evaluate
+print('\n# Evaluate on test data')
+results = lstm_bidirect.evaluate(X_test, y_test, batch_size=100)
+print('test mse', results)
+
+
+plt.figure(figsize = (10,6))
+plt.plot(history3.epoch, np.array(history3.history['loss'])**0.5, label="train", color = "blue")
+plt.plot(history3.epoch, np.array(history3.history['val_loss'])**0.5, label="test", color = "red")
+plt.xlabel("epoch")
+plt.ylabel("RMSE")
+plt.legend()
+plt.savefig(fig_folder  + '/bidirect_train_test_RMSE.pdf')
+plt.show()
