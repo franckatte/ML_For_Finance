@@ -71,7 +71,7 @@ model = KerasRegressor(build_fn = create_denoising_ae)
 
 # Define the parameters to try out
 params = {'encoding_dim':[1,2],'activation1': ['sigmoid', 'tanh'],'activation2':['linear', 'tanh'],'batch_size': [10,50, 100, 200],
-          'learning_rate': [0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.4,0.5]}
+          'learning_rate': [0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.2,0.4,0.5]}
 
 
 # create the CPCV folds indexes
@@ -90,13 +90,20 @@ random_search.best_params_
 ## training parameters
 
 learning_rate = 0.001
-epochs = 500
+epochs = 200
 encoding_dim = 2
 dropout = 0.5
-batch_size = 100
-activation2 = 'linear'
+batch_size = 10
+activation2 = 'tanh'
 activation1 = 'tanh'
 
+learning_rate = 0.001
+epochs = 500
+encoding_dim = 2
+dropout = 0.4
+batch_size = 10
+activation2 = 'linear'
+activation1 = 'tanh'
 # create model
 autoencoder =  create_denoising_ae(learning_rate,dropout,encoding_dim,activation1,activation2)
 
@@ -104,7 +111,7 @@ autoencoder =  create_denoising_ae(learning_rate,dropout,encoding_dim,activation
 autoencoder.summary()
 
 # Define a callback
-modelCheckpoint = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_auto_encoder.hdf5',  save_best_only = True)
+modelCheckpoint = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_autoencoder.hdf5',  save_best_only = True)
 
 # fit the model
 history = autoencoder.fit(X_train, X_train, epochs = epochs, batch_size = batch_size, shuffle = True, 
@@ -114,6 +121,7 @@ history = autoencoder.fit(X_train, X_train, epochs = epochs, batch_size = batch_
 
 ## Plot RMSE
 fig_folder = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/figures/autoencoder'
+
 plt.figure(figsize = (10,6))
 plt.plot(history.epoch, np.array(history.history['loss'])**0.5, label="train", color = "blue")
 plt.plot(history.epoch, np.array(history.history['val_loss'])**0.5, label="test", color = "red")
@@ -125,7 +133,7 @@ plt.show()
 
 # evaluate
 print('\n# Evaluate on test data')
-results = autoencoder.evaluate(X_train, X_train, batch_size=100)
+results = autoencoder.evaluate(X_test, X_test, batch_size=100)
 print('test mse', results)
 
 #  plot function

@@ -18,13 +18,11 @@ from keras.models import Model
 from keras.callbacks import ModelCheckpoint
 from keras.wrappers.scikit_learn import KerasRegressor
 from keras.optimizers import Adam
-from keras.models import load_model
 from tscpcv import CPCV
 
 
 df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv',sep = ","
                  ,parse_dates = True,index_col = 0 )
-
 
 # 
 times = [1,2,3]
@@ -33,12 +31,9 @@ m_path = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machi
 X,y = supervised(df,growth_freqs = [20,40,60],backwards = times, scale_eco = True,denoise = True,model_path = m_path)
 
 
-# reshape the data  
-X = reshape(X,backwards = times)
-y = y.to_numpy()
-
 # split data into test/train
-X_train,X_test,y_train,y_test = train_test_split(X,y,test_size = 0.2, shuffle = False)
+X_train0,X_test0,y_train0,y_test0 = train_test_split(X,y,test_size = 0.2, shuffle = False)
+X_train,X_test,y_train,y_test = reshape(X_train0,backwards = times),reshape(X_test0,backwards = times),y_train0.to_numpy(),y_test0.to_numpy()
 
 # model dimension
 time_steps = len(times)
@@ -47,7 +42,7 @@ output_dim = y.shape[1]
 
 ##create vanilla LSTM model
 
-def vanilla_LSTM(learning_rate,size,dropout,encoding_dim,activation1,activation2):
+def vanilla_LSTM(learning_rate,size,dropout,activation1,activation2):
     # Create an Adam optimizer with the given learning rate
     opt = Adam(lr = learning_rate)
     # input data
@@ -64,10 +59,13 @@ def vanilla_LSTM(learning_rate,size,dropout,encoding_dim,activation1,activation2
     
     # model
     lstm = Model(input_layer, output_layer)
+    
+    # compile the model
+    lstm.compile(optimizer = opt, loss = 'mean_squared_error')
 
-    return lstm.compile(optimizer = opt, loss = 'mean_squared_error')
+    return lstm
 
-def stacked_LSTM(learning_rate,size1,size2,dropout,encoding_dim,activation1,activation2,activation3):
+def stacked_LSTM(learning_rate,size1,size2,dropout,activation1,activation2,activation3):
     # Create an Adam optimizer with the given learning rate
     opt = Adam(lr = learning_rate)
     # input data
@@ -85,10 +83,13 @@ def stacked_LSTM(learning_rate,size1,size2,dropout,encoding_dim,activation1,acti
     
     # model
     lstm = Model(input_layer, output_layer)
+    
+     # compile the model
+    lstm.compile(optimizer = opt, loss = 'mean_squared_error')
+    
+    return lstm
 
-    return lstm.compile(optimizer = opt, loss = 'mean_squared_error')
-
-def bi_LSTM(learning_rate,size,dropout,encoding_dim,activation1,activation2):
+def bi_LSTM(learning_rate,size,dropout,activation1,activation2):
     # Create an Adam optimizer with the given learning rate
     opt = Adam(lr = learning_rate)
     # input data
@@ -98,16 +99,23 @@ def bi_LSTM(learning_rate,size,dropout,encoding_dim,activation1,activation2):
     Dropout(dropout)(input_layer)
     
     # hidden layers
-    hidden =  Bidirectional(LSTM(size1 , activation = activation1, return_sequences=True))(input_layer)
+    hidden =  Bidirectional(LSTM(size , activation = activation1, return_sequences=True))(input_layer)
     
     # output layer
-    output_layer = Dense(output_dim, activation = activation3)(hidden)
+    output_layer = Dense(output_dim, activation = activation2)(hidden)
     
     # model
     lstm = Model(input_layer, output_layer)
+    
+     # compile the model
+    lstm.compile(optimizer = opt, loss = 'mean_squared_error')
 
-    return lstm.compile(optimizer = opt, loss = 'mean_squared_error')
+    return lstm
 
+
+
+#cpcv splits
+cpcv = CPCV(X_train0, n_split = 6, n_folds = 2, purge = 60, embargo = 1)
 
 ### vanilla lstm
 
@@ -115,27 +123,106 @@ def bi_LSTM(learning_rate,size,dropout,encoding_dim,activation1,activation2):
 lstm1 = KerasRegressor(build_fn = vanilla_LSTM)
 
 # Define the parameters to try out
-params = {'size':[1,2],'activation1': ['softmax','sigmoid', 'tanh'],'activation2': ['softmax','sigmoid', 'tanh'],'activation3':['linear', 'tanh'],
-          'batch_size': [10,50, 100, 200],'learning_rate': [ 0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.1,0.2,0.3]}
+params1 = {'size':[1,10,50,100],'activation1': ['softmax'],'activation2': ['linear', 'tanh']
+           ,'batch_size': [10,50, 100, 200],'learning_rate': [0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.1,0.2,0.3]}
 
-
-cv = CPCV(X, n_split = 6, n_folds = 2, purge = 60, embargo = 1, backwards = times)
 
 # Create a randomize search cv object passing in the parameters to try
-random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv,n_jobs = 4)
-
+random_search1 = RandomizedSearchCV(lstm1, param_distributions = params1, cv = cpcv,n_jobs = 4)
 
 # Search for best combinations
-random_search.fit(X_train,X_train)
+random_search1.fit(X_train,y_train)
 
 # results
-random_search.best_params_
+random_search1.best_params_
 
 ## training parameters
 
+learning_rate = 0.01
+size = 50
+epochs = 200
+dropout = 0.2
+batch_size = 50
+activation1 = 'softmax'
+activation2 = 'linear'
+#test mse 3.7345090547719054e-06
 
-history = lstm.fit(X_train, y_train, epochs = 500, batch_size= 200, 
-                          validation_data=(X_test, y_test),verbose=1)
+
+# create model
+
+lstm_vanilla =  vanilla_LSTM(learning_rate,size,dropout,activation1,activation2)
+
+# checkpoint
+modelCheckpoint1 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_vanilla_lstm.hdf5',  save_best_only = True)
+
+
+history1 = lstm_vanilla.fit(X_train, y_train,epochs, batch_size, 
+                          validation_data=(X_test, y_test),callbacks = [modelCheckpoint1],verbose=1)
+
+# evaluate
+print('\n# Evaluate on test data')
+results = lstm_vanilla.evaluate(X_test, y_test, batch_size=100)
+print('test mse', results)
+
+plt.figure(figsize = (10,6))
+plt.plot(history1.epoch, np.array(history1.history['loss'])**0.5, label="train", color = "blue")
+plt.plot(history1.epoch, np.array(history1.history['val_loss'])**0.5, label="test", color = "red")
+plt.xlabel("epoch")
+plt.ylabel("RMSE")
+plt.legend()
+plt.show()
+
+
+
+### stacked LSTM
+
+# Create a KerasRegressor
+lstm2 = KerasRegressor(build_fn = stacked_LSTM)
+
+# Define the parameters to try out
+params2 = {'size':[1,10,50,100],'activation1': ['softmax'],'activation2': ['linear','softmax', 'tanh'],'activation3': ['linear','tanh']
+           ,'batch_size': [10,50,100,200],'learning_rate': [0.01,0.001],'epochs': [10,50,100,200,500], 'dropout':[0.1,0.2,0.3]}
+
+
+# Create a randomize search cv object passing in the parameters to try
+random_search2 = RandomizedSearchCV(lstm2, param_distributions = params1, cv = cpcv,n_jobs = 4)
+
+# Search for best combinations
+random_search2.fit(X_train,y_train)
+
+# results
+random_search2.best_params_
+
+
+## training parameters
+learning_rate = 0.01
+size1 = 50
+size2 = 50
+epochs = 200
+dropout = 0.2
+batch_size = 50
+activation1 = 'softmax'
+activation2 = 'linear'
+activation3 = 
+# create model
+
+
+lstm_stacked =  stacked_LSTM(learning_rate,size1,size2,dropout,activation1,activation2,activation3)
+
+# checkpoint
+modelCheckpoint1 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_vanilla_lstm.hdf5',  save_best_only = True)
+
+
+history1 = lstm_vanilla.fit(X_train, y_train,epochs, batch_size, 
+                          validation_data=(X_test, y_test),callbacks = [modelCheckpoint1],verbose=1)
+
+# evaluate
+print('\n# Evaluate on test data')
+results = lstm_vanilla.evaluate(X_test, y_test, batch_size=100)
+print('test mse', results)
+
+
+
 
 plt.figure(figsize = (10,6))
 plt.plot(history.epoch, np.array(history.history['loss'])**0.5, label="train", color = "blue")
@@ -144,3 +231,7 @@ plt.xlabel("epoch")
 plt.ylabel("RMSE")
 plt.legend()
 plt.show()
+params = {'size':[1,2],'activation1': ['softmax','sigmoid', 'tanh'],'activation2': ['softmax','sigmoid', 'tanh'],'activation3':['linear', 'tanh'],
+          'batch_size': [10,50, 100, 200],'learning_rate': [ 0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.1,0.2,0.3]}
+
+
