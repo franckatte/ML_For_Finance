@@ -30,7 +30,7 @@ class VARMAmodel:
     # We init the model with the train data set in pandas and 
     #the order p and q we want
     
-    #get_summury is to have every detail on the fit
+    #get_summary is to have every detail on the fit
     
     #predict need the index of the data we want to predict
     

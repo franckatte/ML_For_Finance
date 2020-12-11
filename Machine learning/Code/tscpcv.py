@@ -10,6 +10,22 @@ import numpy as np
 
 
 def purge_embargoCV(X,train_folds,test_folds,purge,embargo):
+    '''
+        remove embogoing and purging days on a training set
+
+         parameters
+        ------------
+        X(pandas df): data frame of training regressors and splitting groups ids
+        train_folds(tuple): training groups ids
+        test_folds(list): testing groups ids
+        purge(int): number of purging days 
+        embargo(int): number of embargoing days
+        
+        Return
+        ------------
+        train indexes,test indexes (numpy array, numpy array): train and test indexes after pruning and embargoing
+    '''
+    
 
     # train/test set
     X_train =  X.loc[X['group'].isin(train_folds)].drop('group',axis = 1).copy() 
@@ -37,9 +53,20 @@ def purge_embargoCV(X,train_folds,test_folds,purge,embargo):
     return np.array(X_train.index), np.array(X_test.index)
 
   
-def missing(group,indices):
+def test_groups(train_groups,groups_ids):
+    '''
+        return test groups indexes
+         parameters
+        ------------
+        train_groups(tuple): train groups ids
+        groups_ids(list): full list of splitting groups
+        
+        Return
+        ------------
+        res(list): list of testing groups ids
+    '''
     
-    res = [*filter(lambda x: False if x in group else True,indices)]
+    res = [*filter(lambda x: False if x in train_groups else True,groups_ids)]
     return res
 
 
@@ -77,7 +104,7 @@ def CPCV(X,Y,n_split,n_folds,purge,embargo):
 
     for train_folds in train_groups:
         
-        test_folds = missing(train_folds,splits_ids)
+        test_folds = test_groups(train_folds,splits_ids)
         
         train_index, test_index = purge_embargoCV(X2,train_folds,test_folds,purge,embargo)
         

@@ -17,6 +17,7 @@ from keras.callbacks import ModelCheckpoint
 from keras.wrappers.scikit_learn import KerasRegressor
 from keras.optimizers import Adam
 from sklearn.model_selection import RandomizedSearchCV, KFold
+from tscpcv import CPCV
 
 # import data
 df = df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv',sep = ","
@@ -69,23 +70,18 @@ def create_denoising_ae(learning_rate, dropout,encoding_dim,activation1,activati
 model = KerasRegressor(build_fn = create_denoising_ae)
 
 # Define the parameters to try out
-params = {'encoding_dim':[1,2],'activation1': ['sigmoid', 'tanh'],'activation2':['linear', 'tanh'],'batch_size': [50, 100, 200],
-          'learning_rate': [0.1, 0.01, 0.001],'epochs': [100, 200,500], 'dropout':[0.3,0.4,0.5]}
+params = {'encoding_dim':[1,2],'activation1': ['sigmoid', 'tanh'],'activation2':['linear', 'tanh'],'batch_size': [10,50, 100, 200],
+          'learning_rate': [0.1, 0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.3,0.4,0.5]}
 
 # Create a randomize search cv object passing in the parameters to try
-random_search = RandomizedSearchCV(model, param_distributions = params, cv = KFold(5))
+#random_search = RandomizedSearchCV(model, param_distributions = params, cv = KFold(5))
 
+# create the CPCV folds indexes
+cpcv = CPCV(X_train_0, X_train_0, n_split = 6, n_folds = 2, purge = 0, embargo = 0)
 
-# =============================================================================
-# Pour Corentin
-# from tscpcv import CPCV
-# 
-# cpcv = CPCV(X_train_0, X_train_0, n_split = 4, n_folds = 2, purge = 1, embargo = 0)
-# 
-# # Create a randomize search cv object passing in the parameters to try
-# random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv)
-# 
-# =============================================================================
+# Create a randomize search cv object passing in the parameters to try
+random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv)
+
 
 # Search for best combinations
 random_search.fit(X_train,X_train)
@@ -102,6 +98,15 @@ encoding_dim = 2
 dropout = 0.5
 batch_size = 50
 activation2 = 'tanh'
+activation1 = 'tanh'
+# 6.6108e-07
+
+learning_rate = 0.001
+epochs = 500
+encoding_dim = 2
+dropout = 0.4
+batch_size = 100
+activation2 = 'linear'
 activation1 = 'tanh'
 
 

@@ -133,6 +133,18 @@ def supervised(df,growth_freqs,backwards):
     
 
 def reshape(X,backwards):
+    '''
+        reshape data as required to feed the lstm model
+        
+        parameters
+        ------------
+        X(pandas df): dataframe containing the regressors
+        backwards(list): days between target variables and observed data used to predict
+        
+        Return
+        ------------
+        A(3 dimensional array numpy array): (samples, timesteps, features)
+    '''
     
     backwards2 =  backwards.copy()
     backwards2.sort(reverse = True)
