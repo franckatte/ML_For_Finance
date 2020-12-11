@@ -90,8 +90,8 @@ def rolling_growth(df,freqs,col, drop = True):
 def denoiser(df,backwards,model_path):
     
     autoencoder = load_model(model_path)
-    df2 = df.iloc[:,df.columns.str.contains('J')]
-    print(df2)
+    df2 = df.iloc[:,df.columns.str.contains('J')].copy()
+
     for l in backwards:
         name =  "(t-" + str(l) + ")"
         df2.iloc[:,df2.columns.str.contains(name)] = autoencoder.predict(df2.iloc[:,df2.columns.str.contains(name)].to_numpy())
