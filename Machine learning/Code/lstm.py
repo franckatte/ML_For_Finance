@@ -27,7 +27,7 @@ df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projec
 # 
 times = [1,2,3]
 # create features and transform the data in the supervised format
-m_path = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_auto_encoder.hdf5'
+m_path = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_autoencoder.hdf5'
 X,y = supervised(df,growth_freqs = [20,40,60],backwards = times, scale_eco = True,denoise = True,model_path = m_path)
 
 
@@ -115,7 +115,7 @@ def bi_LSTM(learning_rate,size,dropout,activation1,activation2):
 
 
 #cpcv splits
-cpcv = CPCV(X_train0, n_split = 6, n_folds = 2, purge = 60, embargo = 1)
+cpcv = CPCV(X_train0, n_split = 5, n_folds = 2, purge = 60, embargo = 1)
 
 ### vanilla lstm
 
@@ -128,7 +128,7 @@ params1 = {'size':[1,10,50,100],'activation1': ['softmax'],'activation2': ['line
 
 
 # Create a randomize search cv object passing in the parameters to try
-random_search1 = RandomizedSearchCV(lstm1, param_distributions = params1, cv = cpcv,n_jobs = 4)
+random_search1 = RandomizedSearchCV(lstm1, param_distributions = params1, cv = cpcv,n_jobs = -1)
 
 # Search for best combinations
 random_search1.fit(X_train,y_train)
@@ -138,14 +138,14 @@ random_search1.best_params_
 
 ## training parameters
 
-learning_rate = 0.01
+learning_rate = 0.001
 size = 50
-epochs = 200
-dropout = 0.2
-batch_size = 50
+epochs = 100
+dropout = 0.3
+batch_size = 10
 activation1 = 'softmax'
-activation2 = 'linear'
-#test mse 3.7345090547719054e-06
+activation2 = 'tanh'
+#test mse 0.00016341298428145087
 
 
 # create model

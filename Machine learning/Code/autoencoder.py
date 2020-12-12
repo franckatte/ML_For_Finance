@@ -70,32 +70,100 @@ def create_denoising_ae(learning_rate, dropout,encoding_dim,activation1,activati
 model = KerasRegressor(build_fn = create_denoising_ae)
 
 # Define the parameters to try out
-params = {'encoding_dim':[1,2],'activation1': ['sigmoid', 'tanh'],'activation2':['linear', 'tanh'],'batch_size': [10,50, 100, 200],
-          'learning_rate': [0.01, 0.001],'epochs': [10,50,100, 200,500], 'dropout':[0.2,0.4,0.5]}
+params = {'encoding_dim':[2],'activation1': ['softmax', 'tanh'],'activation2':['linear', 'tanh'],'batch_size': [10,50,100, 200],
+          'learning_rate': [0.01, 0.001],'epochs': [10,50,100,200,500], 'dropout':[0.2,0.4,0.5]}
 
 
 # create the CPCV folds indexes
 cpcv = CPCV(X_train_0, n_split = 6, n_folds = 2, purge = 0, embargo = 0)
 
 # Create a randomize search cv object passing in the parameters to try
-random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv,n_jobs = 4, n_iter = 20)
+random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv,n_jobs = -1)
 
 
-# Search for best combinations
-random_search.fit(X_train,X_train)
+rs_results = []
 
-# results
-random_search.best_params_
+for i in range(10):
+    # Search for best combinations
+    random_search.fit(X_train,X_train)
+
+    # results
+    rs_results.append(random_search.best_params_)
 
 ## training parameters
 
 learning_rate = 0.001
-epochs = 200
+epochs = 500
 encoding_dim = 2
 dropout = 0.5
+batch_size = 50
+activation2 = 'tanh'
+activation1 = 'tanh'
+#9.0654e-07
+
+learning_rate = 0.001
+epochs = 500
+encoding_dim = 2
+dropout = 0.5
+batch_size = 50
+activation2 = 'linear'
+activation1 = 'tanh'
+#8.9659e-07
+
+learning_rate = 0.001
+epochs = 500
+encoding_dim = 2
+dropout = 0.5
+batch_size = 100
+activation2 = 'linear'
+activation1 = 'tanh'
+#6.9374e-07
+
+
+learning_rate = 0.001
+epochs = 500
+encoding_dim = 2
+dropout = 0.5
+batch_size = 200
+activation2 = 'tanh'
+activation1 = 'tanh'
+#8.7805e-07
+
+learning_rate = 0.001
+epochs = 500
+encoding_dim = 2
+dropout = 0.4
 batch_size = 10
 activation2 = 'tanh'
 activation1 = 'tanh'
+#6.1353e-07
+
+learning_rate = 0.01
+epochs = 100
+encoding_dim = 2
+dropout = 0.5
+batch_size = 100
+activation2 = 'tanh'
+activation1 = 'tanh'
+#9.8812e-07
+
+learning_rate = 0.01
+epochs = 200
+encoding_dim = 2
+dropout = 0.5
+batch_size = 100
+activation2 = 'tanh'
+activation1 = 'tanh'
+#1.6776e-06
+
+learning_rate = 0.01
+epochs = 200
+encoding_dim = 2
+dropout = 0.2
+batch_size = 50
+activation2 = 'linear'
+activation1 = 'tanh'
+#5.8415e-07
 
 learning_rate = 0.001
 epochs = 500
@@ -104,6 +172,29 @@ dropout = 0.4
 batch_size = 10
 activation2 = 'linear'
 activation1 = 'tanh'
+#5.5043e-07
+
+
+learning_rate = 0.001
+epochs = 500
+encoding_dim = 2
+dropout = 0.4
+batch_size = 50
+activation2 = 'linear'
+activation1 = 'tanh'
+#6.7843e-07
+
+
+
+learning_rate = 0.001
+epochs = 200
+encoding_dim = 2
+dropout = 0.5
+batch_size = 10
+activation2 = 'tanh'
+activation1 = 'tanh'
+#4.6600e-07
+
 # create model
 autoencoder =  create_denoising_ae(learning_rate,dropout,encoding_dim,activation1,activation2)
 
