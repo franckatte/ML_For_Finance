@@ -10,7 +10,6 @@ Created on Tue Dec  1 20:08:01 2020
 
 import pandas as pd
 import numpy as np
-from sklearn import preprocessing
 from keras.models import load_model
 
 df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv',sep = ","
@@ -101,7 +100,7 @@ def denoiser(df,backwards,model_path):
 
     
     
-def supervised(df,growth_freqs,backwards,denoise = True,model_path = None,scale_eco = True):
+def supervised(df,growth_freqs,backwards,denoise = True,model_path = None,scale_eco = True,nb_years = None):
     '''
         create supervised learning data for a lead time
         
@@ -119,10 +118,8 @@ def supervised(df,growth_freqs,backwards,denoise = True,model_path = None,scale_
     '''
     
     
-    df2 = df.copy()
-    if scale_eco == True:
-        df2.iloc[:,~df2.columns.str.contains('J')] = df2.iloc[:,~df2.columns.str.contains('J')].apply(preprocessing.scale).copy()
-
+    df2 = sub_range(df,nb_years)
+    
     cols = list(df2.columns)
     cols.reverse()
     
@@ -153,6 +150,9 @@ def supervised(df,growth_freqs,backwards,denoise = True,model_path = None,scale_
         
         X = denoiser(X,backwards,model_path)
     
+    if scale_eco == True:
+        df2.iloc[:,~df2.columns.str.contains('J')] = df2.iloc[:,~df2.columns.str.contains('J')].apply(lambda x: (x - x.min())/(x.max() - x.min())).copy()
+
     return X,y
     
 
