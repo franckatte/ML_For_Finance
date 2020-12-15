@@ -40,12 +40,11 @@ output_dim = X_train.shape[1]
 model = KerasRegressor(build_fn = create_denoising_ae)
 
 # Define the parameters to try out
-params = {'input_dim':[input_dim], 'output_dim':[output_dim],'encoding_dim':[3],'activation1': ['softmax', 'tanh'],'activation2':['linear', 'tanh'],'batch_size': [10,50,100, 200],
-          'learning_rate': [0.01, 0.001],'epochs': [10,50,100,200,500], 'dropout':[0.2,0.4,0.5]}
-
+params = {'input_dim':[input_dim], 'output_dim':[output_dim],'encoding_dim':[2,3],'activation1': ['softmax','linear','tanh','elu'],'activation2':['linear', 'tanh'],'batch_size': [10,50,100,200],
+          'learning_rate': [0.01, 0.001],'epochs': [10,50,100,200,500], 'std':[0.001,0.002,0.003]}
 
 # create the CPCV folds indexes
-cpcv = CPCV(X_train_0, n_split = 5, n_folds = 2, purge = 0, embargo = 0)
+cpcv = CPCV(X_train_0, n_split = 6, n_folds = 2, purge = 0, embargo = 0)
 
 # Create a randomize search cv object passing in the parameters to try
 random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv,n_jobs = -1)
@@ -59,36 +58,36 @@ random_search.best_params_
 
 ## training parameters
 
-learning_rate = 0.001
-epochs = 200
-encoding_dim = 3
-dropout = 0.5
-batch_size = 10
-activation2 = 'tanh'
-activation1 = 'tanh'
-
 
 # =============================================================================
 # learning_rate = 0.001
-# epochs = 500
+# epochs = 200
 # encoding_dim = 2
-# dropout = 0.5
-# batch_size = 100
+# std = 0.001
+# batch_size = 10
 # activation2 = 'tanh'
-# activation1 = 'tanh'
-# #loss: 9.9146e-08 - val_loss: 6.1573e-07
-# 
+# activation1 = 'linear'
 # 
 # =============================================================================
- 
+
+
+learning_rate = 0.01
+epochs = 500
+encoding_dim = 3
+std = 0.001
+batch_size = 10
+activation2 = 'tanh'
+activation1 = 'linear'
+
+
 # create model
-autoencoder =  create_denoising_ae(input_dim, output_dim,learning_rate,dropout,encoding_dim,activation1,activation2)
+autoencoder =  create_denoising_ae(input_dim, output_dim,learning_rate,std,encoding_dim,activation1,activation2)
 
 # summary the model
 autoencoder.summary()
 
 # Define a callback
-#modelCheckpoint = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_autoencoder.hdf5',  save_best_only = True)
+#modelCheckpoint = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_autoencoder2.hdf5',  save_best_only = True)
 
 # fit the model
 history = autoencoder.fit(X_train, X_train, epochs = epochs, batch_size = batch_size, 
@@ -108,6 +107,8 @@ plot_rmse(history,train_test_folder,'train_test_RMSE')
 
 ## RMSE per maturity
 yields_rmse(autoencoder,X_train,X_train)
+
+yields_rmse(autoencoder,X_test,X_test)
 
 # prediction train
 plot_yields(autoencoder,X_train_0,X_train_0,train_test_folder,"train")

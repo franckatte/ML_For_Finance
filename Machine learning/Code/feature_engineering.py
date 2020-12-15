@@ -93,7 +93,7 @@ def denoiser(df,backwards,model_path):
 
     for l in backwards:
         name =  "(t-" + str(l) + ")"
-        df2.iloc[:,df2.columns.str.contains(name)] = autoencoder.predict(df2.iloc[:,df2.columns.str.contains(name)].to_numpy())
+        df2.iloc[:,df2.columns.str.contains(name, regex = False)] = autoencoder.predict(df2.iloc[:,df2.columns.str.contains(name, regex = False)].to_numpy())
     
     return df2
         
@@ -176,7 +176,7 @@ def reshape(X,backwards):
     
     for i in backwards2:
         ticker = "(t-" + str(i) + ")"
-        sequence.append(X.iloc[:,X.columns.str.contains(ticker)].values)
+        sequence.append(X.iloc[:,X.columns.str.contains(ticker, regex = False)].values)
     
     nb_obs = sequence[0].shape[0]
     nb_features= sequence[0].shape[1]

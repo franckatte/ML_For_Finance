@@ -9,24 +9,25 @@ Created on Sat Dec 12 12:20:41 2020
 
 import matplotlib.pyplot as plt
 import numpy as np
-from keras.layers import Input, Dense, LSTM, Dropout,Bidirectional
+from keras.layers import Input, Dense, LSTM, Dropout,Bidirectional, BatchNormalization, GaussianNoise
 from keras.models import Model
 from keras.optimizers import Adam
 
 import pandas as pd
 
 ##create denoising_ae model
-def create_denoising_ae(input_dim, output_dim,learning_rate,dropout,encoding_dim,activation1,activation2):
+def create_denoising_ae(input_dim, output_dim,learning_rate,std,encoding_dim,activation1,activation2):
     # Create an Adam optimizer with the given learning rate
     opt = Adam(lr = learning_rate)
       
     ## input data
     input_layer = Input(shape = (input_dim,))
-    ## dropout layer
-    Dropout(dropout)(input_layer)
+    
+    ## gaussian layer
+    GS = GaussianNoise(std)(input_layer)
     
     ## "encoded" is the encoded representation of the inputs
-    encoded = Dense(encoding_dim * 2 , activation = activation1)(input_layer)
+    encoded = Dense(encoding_dim * 2 , activation = activation1)(GS)
     
     ## coded 
     coded = Dense(encoding_dim  , activation = activation1)(encoded)
@@ -49,20 +50,24 @@ def create_denoising_ae(input_dim, output_dim,learning_rate,dropout,encoding_dim
 
 ##create vanilla LSTM model
 
-def vanilla_LSTM(time_steps,nb_features,output_dim,learning_rate,size,dropout,activation1,activation2):
+def vanilla_LSTM(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2):
     # Create an Adam optimizer with the given learning rate
     opt = Adam(lr = learning_rate)
     # input data
     input_layer = Input(shape = (time_steps,nb_features))
+   
+    # batch normalization
+    BN = BatchNormalization()(input_layer)
     
-    ## dropout layer
-    Dropout(dropout)(input_layer)
     
     # hidden layers
-    hidden =  LSTM(size , activation = activation1)(input_layer)
+    hidden =  LSTM(size , activation = activation1)(BN)
+    
+    # batch normalization
+    BN = BatchNormalization()(hidden)
     
     # output layer
-    output_layer = Dense(output_dim, activation = activation2)(hidden)
+    output_layer = Dense(output_dim, activation = activation2)(BN)
     
     # model
     lstm = Model(input_layer, output_layer)
@@ -73,21 +78,30 @@ def vanilla_LSTM(time_steps,nb_features,output_dim,learning_rate,size,dropout,ac
     return lstm
 
 ##create stacked LSTM model
-def stacked_LSTM(time_steps,nb_features,output_dim,learning_rate,size1,size2,dropout,activation1,activation2,activation3):
+def stacked_LSTM(time_steps,nb_features,output_dim,learning_rate,size1,size2,activation1,activation2,activation3):
     # Create an Adam optimizer with the given learning rate
     opt = Adam(lr = learning_rate)
     # input data
     input_layer = Input(shape = (time_steps,nb_features))
     
-    ## dropout layer
-    Dropout(dropout)(input_layer)
+    # batch normalization
+    BN = BatchNormalization()(input_layer)
+    
     
     # hidden layers
-    hidden =  LSTM(size1 , activation = activation1, return_sequences=True)(input_layer)
-    hidden =  LSTM(size2 , activation = activation2,)(hidden)
+    hidden =  LSTM(size1 , activation = activation1, return_sequences=True)(BN)
+    
+    # bactch normalization
+    BN = BatchNormalization()(hidden)
+    
+    # hidden layers
+    hidden =  LSTM(size2 , activation = activation2,)(BN)
+    
+    # batch normalization
+    BN = BatchNormalization()(hidden)
     
     # output layer
-    output_layer = Dense(output_dim, activation = activation3)(hidden)
+    output_layer = Dense(output_dim, activation = activation3)(BN)
     
     # model
     lstm = Model(input_layer, output_layer)
@@ -98,21 +112,25 @@ def stacked_LSTM(time_steps,nb_features,output_dim,learning_rate,size1,size2,dro
     return lstm
 
 ##create bivariate LSTM model
-def bi_LSTM(time_steps,nb_features,output_dim,learning_rate,size,dropout,activation1,activation2):
+def bi_LSTM(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2):
     # Create an Adam optimizer with the given learning rate
     opt = Adam(lr = learning_rate)
     # input data
     input_layer = Input(shape = (time_steps,nb_features))
     
-    ## dropout layer
-    Dropout(dropout)(input_layer)
-    
+    # batch normalization
+    BN= BatchNormalization()(input_layer)
+        
     # hidden layers
-    hidden =  Bidirectional(LSTM(size , activation = activation1))(input_layer)
+    hidden =  Bidirectional(LSTM(size , activation = activation1))(BN)
+    
+    # batch normalization
+    BN = BatchNormalization()(hidden)
     
     # output layer
-    output_layer = Dense(output_dim, activation = activation2)(hidden)
+    output_layer = Dense(output_dim, activation = activation2)(BN)
     
+
     # model
     lstm = Model(input_layer, output_layer)
     
@@ -141,7 +159,7 @@ def plot_yields(model,X,y,folder, ticker):
     y_pred = pd.DataFrame(model.predict(X),columns = pred_terms, index = y.index)
     y = y.join(y_pred)
     
-    print(y)
+
     for  i,term in enumerate(terms):
         plt.figure(figsize = (10,6))
         y.loc[:,[term, term + " pred"]].plot( color = ['blue','red'])
@@ -155,7 +173,6 @@ def yields_rmse(model,X,y):
     terms = ['1J', '2J','3J', '4J', '5J', '6J','7J', '8J', '9J', '10J', '15J', '20J', '30J']
 
     y_preds = model.predict(X)
-    print(y_preds.shape)
     res = []
     
     for i in range(n):
