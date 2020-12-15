@@ -67,7 +67,6 @@ random_search1.best_params_
 
 ## training parameters
 
-
 learning_rate = 0.01
 size = 13
 epochs = 500
@@ -77,7 +76,7 @@ activation1 = 'softmax'
 activation2 = 'linear'
 
 # create model
-lstm_vanilla =  vanilla_LSTM(time_steps,nb_features,output_dim,learning_rate,size,dropout,activation1,activation2)
+lstm_vanilla =  vanilla_LSTM(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2)
 
 # checkpoint
 modelCheckpoint1 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_vanilla_lstm10.hdf5',  save_best_only = True)
@@ -116,7 +115,7 @@ params2 = {'time_steps':[time_steps],'nb_features':[nb_features],'output_dim':[o
 
 
 # Create a randomize search cv object passing in the parameters to try
-random_search2 = RandomizedSearchCV(lstm2, param_distributions = params2, cv = cpcv,n_jobs = -1)
+#random_search2 = RandomizedSearchCV(lstm2, param_distributions = params2, cv = cpcv,n_jobs = -1)
 
 # Search for best combinations
 random_search2.fit(X_train,y_train,callbacks = [earlystopping])
@@ -131,17 +130,16 @@ learning_rate = 0.01
 size1 = 13
 size2 = 13
 epochs = 500
-dropout = 0.1
 batch_size = 50
 activation1 = 'softmax'
 activation2 = 'softmax'
 activation3 = 'tanh'
 # create model
 
-lstm_stacked =  stacked_LSTM(time_steps,nb_features,output_dim,learning_rate,size1,size2,dropout,activation1,activation2,activation3)
+lstm_stacked =  stacked_LSTM(time_steps,nb_features,output_dim,learning_rate,size1,size2,activation1,activation2,activation3)
 
 # checkpoint
-modelCheckpoint2 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_stacked_lstm10.hdf5',  save_best_only = True)
+#modelCheckpoint2 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_stacked_lstm10.hdf5',  save_best_only = True)
 
 
 history2 = lstm_stacked.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 
@@ -192,17 +190,16 @@ random_search3.best_params_
 learning_rate = 0.01
 size = 13
 epochs = 500
-dropout = 0.1
 batch_size = 10
 activation1 = 'softmax'
 activation2 = 'linear'
 
 
 # create model
-lstm_bidirect =  bi_LSTM(time_steps,nb_features,output_dim,learning_rate,size,dropout,activation1,activation2)
+lstm_bidirect =  bi_LSTM(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2)
 
 # checkpoint
-modelCheckpoint3 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_bidirectional_lstm10.hdf5',  save_best_only = True)
+#modelCheckpoint3 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_bidirectional_lstm10.hdf5',  save_best_only = True)
 
 
 history3 = lstm_bidirect.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 
