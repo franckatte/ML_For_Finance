@@ -39,7 +39,7 @@ nb_features = int(X.shape[1]/time_steps)
 output_dim = y.shape[1]
 
 #cpcv splits
-cpcv = CPCV(X_train0, n_split = 5, n_folds = 2, purge = 60, embargo = 1)
+cpcv = CPCV(X_train0, n_split = 6, n_folds = 2, purge = 60, embargo = 1)
 
 # callbacks
 earlystopping = EarlyStopping(monitor="val_loss",patience = 10,restore_best_weights = True)
@@ -174,7 +174,7 @@ params3 = {'time_steps':[time_steps],'nb_features':[nb_features],'output_dim':[o
            'size':[13,50,100],'activation1': ['softmax'],
            'activation2': ['linear', 'tanh']
            ,'batch_size': [10,50,100],'learning_rate': [0.01, 0.001],
-           'epochs': [200,500]}
+           'epochs': [100,500]}
 
 # Create a randomize search cv object passing in the parameters to try
 random_search3 = RandomizedSearchCV(lstm3, param_distributions = params3, cv = cpcv,n_jobs = 3)
@@ -187,7 +187,6 @@ random_search3.best_params_
 
 
 ## training parameters
-
 learning_rate = 0.01
 size = 13
 epochs = 500
