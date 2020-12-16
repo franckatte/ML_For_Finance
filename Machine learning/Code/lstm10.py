@@ -40,6 +40,7 @@ output_dim = y.shape[1]
 
 #cpcv splits
 cpcv = CPCV(X_train0, n_split = 5, n_folds = 2, purge = 60, embargo = 1)
+
 # callbacks
 earlystopping = EarlyStopping(monitor="val_loss",patience = 10,restore_best_weights = True)
 
@@ -54,13 +55,13 @@ params1 = {'time_steps':[time_steps],'nb_features':[nb_features],'output_dim':[o
            'size':[13,50,100],'activation1': ['softmax'],
            'activation2': ['linear', 'tanh']
            ,'batch_size': [50,100],'learning_rate': [0.01, 0.001],
-           'epochs': [200,500], 'dropout':[0.1,0.2,0.3]}
+           'epochs': [200,500]}
 
 # Create a randomize search cv object passing in the parameters to try
-random_search1 = RandomizedSearchCV(lstm1, param_distributions = params1, cv = cpcv,n_jobs = -1)
+random_search1 = RandomizedSearchCV(lstm1, param_distributions = params1, cv = cpcv,n_jobs = 3)
 
 # Search for best combinations
-random_search1.fit(X_train,y_train,callbacks = [earlystopping])
+random_search1.fit(X_train,y_train)
 
 # results
 random_search1.best_params_
@@ -111,14 +112,14 @@ lstm2 = KerasRegressor(build_fn = stacked_LSTM)
 
 # Define the parameters to try out
 params2 = {'time_steps':[time_steps],'nb_features':[nb_features],'output_dim':[output_dim],'size1':[13,50],'size2':[13,50],'activation1': ['softmax'],'activation2': ['linear','softmax', 'tanh'],'activation3': ['linear','tanh']
-           ,'batch_size': [10,50,100],'learning_rate': [0.01,0.001],'epochs': [200,500], 'dropout':[0.1,0.2,0.3]}
+           ,'batch_size': [10,50,100],'learning_rate': [0.01,0.001],'epochs': [200,500]}
 
 
 # Create a randomize search cv object passing in the parameters to try
-#random_search2 = RandomizedSearchCV(lstm2, param_distributions = params2, cv = cpcv,n_jobs = -1)
+random_search2 = RandomizedSearchCV(lstm2, param_distributions = params2, cv = cpcv,n_jobs = 3)
 
 # Search for best combinations
-random_search2.fit(X_train,y_train,callbacks = [earlystopping])
+random_search2.fit(X_train,y_train,callbacks )
 
 # results
 random_search2.best_params_
@@ -173,13 +174,13 @@ params3 = {'time_steps':[time_steps],'nb_features':[nb_features],'output_dim':[o
            'size':[13,50,100],'activation1': ['softmax'],
            'activation2': ['linear', 'tanh']
            ,'batch_size': [10,50,100],'learning_rate': [0.01, 0.001],
-           'epochs': [200,500], 'dropout':[0.1,0.2,0.3]}
+           'epochs': [200,500]}
 
 # Create a randomize search cv object passing in the parameters to try
-random_search3 = RandomizedSearchCV(lstm3, param_distributions = params3, cv = cpcv,n_jobs = 4)
+random_search3 = RandomizedSearchCV(lstm3, param_distributions = params3, cv = cpcv,n_jobs = 3)
 
 # Search for best combinations
-random_search3.fit(X_train,y_train,callbacks = [earlystopping])
+random_search3.fit(X_train,y_train)
 
 # results
 random_search3.best_params_
@@ -199,14 +200,14 @@ activation2 = 'linear'
 lstm_bidirect =  bi_LSTM(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2)
 
 # checkpoint
-#modelCheckpoint3 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_bidirectional_lstm10.hdf5',  save_best_only = True)
+modelCheckpoint3 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_bidirectional_lstm102.hdf5',  save_best_only = True)
 
 
 history3 = lstm_bidirect.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 
                           validation_data=(X_test, y_test),callbacks = [modelCheckpoint3],verbose=1)
 
 # load best model
-lstm_bidirect = load_model('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_bidirectional_lstm10.hdf5')
+lstm_bidirect = load_model('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_bidirectional_lstm102.hdf5')
 
 # evaluate
 print('\n# Evaluate on test data')

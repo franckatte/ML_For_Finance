@@ -54,7 +54,7 @@ params1 = {'time_steps':[time_steps],'nb_features':[nb_features],'output_dim':[o
            'size':[13,50,100],'activation1': ['softmax'],
            'activation2': ['linear', 'tanh']
            ,'batch_size': [50,100],'learning_rate': [0.01, 0.001],
-           'epochs': [200,500], 'dropout':[0.1,0.2,0.3]}
+           'epochs': [200,500]}
 
 # Create a randomize search cv object passing in the parameters to try
 random_search1 = RandomizedSearchCV(lstm1, param_distributions = params1, cv = cpcv,n_jobs = -1)
@@ -109,7 +109,7 @@ lstm2 = KerasRegressor(build_fn = stacked_LSTM)
 
 # Define the parameters to try out
 params2 = {'time_steps':[time_steps],'nb_features':[nb_features],'output_dim':[output_dim],'size1':[13,50],'size2':[13,50],'activation1': ['softmax'],'activation2': ['linear','softmax', 'tanh'],'activation3': ['linear','tanh']
-           ,'batch_size': [10,50,100],'learning_rate': [0.01,0.001],'epochs': [200,500], 'dropout':[0.1,0.2,0.3]}
+           ,'batch_size': [10,50,100],'learning_rate': [0.01,0.001],'epochs': [200,500]}
 
 
 # Create a randomize search cv object passing in the parameters to try
@@ -171,7 +171,7 @@ params3 = {'time_steps':[time_steps],'nb_features':[nb_features],'output_dim':[o
            'size':[13,50,100],'activation1': ['softmax'],
            'activation2': ['linear', 'tanh']
            ,'batch_size': [10,50,100],'learning_rate': [0.01, 0.001],
-           'epochs': [200,500], 'dropout':[0.1,0.2,0.3]}
+           'epochs': [200,500]}
 
 # Create a randomize search cv object passing in the parameters to try
 random_search3 = RandomizedSearchCV(lstm3, param_distributions = params3, cv = cpcv,n_jobs = 4)
