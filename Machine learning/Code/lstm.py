@@ -77,7 +77,7 @@ activation2 = 'linear'
 lstm_vanilla =  vanilla_LSTM(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2)
 
 # checkpoint
-modelCheckpoint1 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_vanilla_lstm.hdf5',  save_best_only = True)
+#modelCheckpoint1 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_vanilla_lstm.hdf5',  save_best_only = True)
 
 history1 = lstm_vanilla.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 
                           validation_data=(X_test, y_test),callbacks = [modelCheckpoint1],verbose = 1)
@@ -137,7 +137,7 @@ activation3 = 'tanh'
 lstm_stacked =  stacked_LSTM(time_steps,nb_features,output_dim,learning_rate,size1,size2,activation1,activation2,activation3)
 
 # checkpoint
-modelCheckpoint2 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_stacked_lstm.hdf5',  save_best_only = True)
+#modelCheckpoint2 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_stacked_lstm.hdf5',  save_best_only = True)
 
 
 history2 = lstm_stacked.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 
@@ -197,7 +197,7 @@ activation2 = 'linear'
 lstm_bidirect =  bi_LSTM(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2)
 
 # checkpoint
-modelCheckpoint3 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_bidirectional_lstm.hdf5',  save_best_only = True)
+#modelCheckpoint3 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_bidirectional_lstm.hdf5',  save_best_only = True)
 
 
 history3 = lstm_bidirect.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 

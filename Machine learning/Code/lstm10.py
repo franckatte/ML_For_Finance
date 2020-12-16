@@ -80,7 +80,7 @@ activation2 = 'linear'
 lstm_vanilla =  vanilla_LSTM(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2)
 
 # checkpoint
-modelCheckpoint1 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_vanilla_lstm10.hdf5',  save_best_only = True)
+#modelCheckpoint1 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_vanilla_lstm10.hdf5',  save_best_only = True)
 
 history1 = lstm_vanilla.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 
                           validation_data=(X_test, y_test),callbacks = [modelCheckpoint1],verbose = 1)
@@ -119,7 +119,7 @@ params2 = {'time_steps':[time_steps],'nb_features':[nb_features],'output_dim':[o
 random_search2 = RandomizedSearchCV(lstm2, param_distributions = params2, cv = cpcv,n_jobs = 3)
 
 # Search for best combinations
-random_search2.fit(X_train,y_train,callbacks )
+random_search2.fit(X_train,y_train)
 
 # results
 random_search2.best_params_
@@ -199,14 +199,14 @@ activation2 = 'linear'
 lstm_bidirect =  bi_LSTM(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2)
 
 # checkpoint
-modelCheckpoint3 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_bidirectional_lstm102.hdf5',  save_best_only = True)
+#modelCheckpoint3 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_bidirectional_lstm10.hdf5',  save_best_only = True)
 
 
 history3 = lstm_bidirect.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 
                           validation_data=(X_test, y_test),callbacks = [modelCheckpoint3],verbose=1)
 
 # load best model
-lstm_bidirect = load_model('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_bidirectional_lstm102.hdf5')
+lstm_bidirect = load_model('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_bidirectional_lstm10.hdf5')
 
 # evaluate
 print('\n# Evaluate on test data')
