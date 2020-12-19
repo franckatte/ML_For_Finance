@@ -28,9 +28,9 @@ def LSTM_dropout_bilstm(time_steps,nb_features,output_dim,learning_rate,size,act
     model.add(LSTM(size, activation=activation1,return_sequences=True,
                                  input_shape=(time_steps,nb_features)))
     model.add(Dropout(Dropout1))
-    
+    model.add(BatchNormalization())
     model.add(Bidirectional(LSTM(size, activation=activation2)))
-    
+    model.add(BatchNormalization())
     model.add(Dense(output_dim))
     model.add(Activation(activation3))
 
@@ -52,9 +52,10 @@ def custom1_LSTM_dropout(time_steps,nb_features,output_dim,learning_rate,size,ac
     model.add(Bidirectional(LSTM(size, activation=activation1,return_sequences=True),
                                  input_shape=(time_steps,nb_features)))
     model.add(Dropout(Dropout1))
-    
+    model.add(BatchNormalization())
     model.add(Bidirectional(LSTM(size, activation=activation2)))
     model.add(Dropout(Dropout2))
+    model.add(BatchNormalization())
     model.add(Dense(output_dim))
     model.add(Activation(activation3))
 
