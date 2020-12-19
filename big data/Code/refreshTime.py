@@ -51,4 +51,46 @@ def  resample(df,r_times):
      df2 = df.loc[sampled_index]
      
      return df2.loc[~df2.index.duplicated(keep = "last")]
+ 
+    
+ 
+def synchro_data(dfs):
+    tau = refresh_time(dfs)
+    num_market= len(dfs)
+    n=len(tau)
+    Data = np.empty((num_market,n))
+    names=[]
+    
+    for m in range(num_market):
+        market = dfs[m]
+        names.append(market.columns[0])
+        indices=market.index
+        Data[m] = np.array([market.iloc[indices<tau[i]][-1] for i in range(len(tau))])
+        
+    DF = pd.DataFrame(data=Data,index=tau,columns=names)
+    return DF
+        
+    
+    
+    
+    
+    
+ 
+    
+ 
+    
+ 
+    
+ 
+    
+ 
+    
+ 
+    
+ 
+    
+ 
+    
+ 
+    
      
