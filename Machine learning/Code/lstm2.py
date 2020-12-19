@@ -135,15 +135,15 @@ random_search2.fit(X_train,y_train)
 # results
 random_search2.best_params_
 
-learning_rate = 0.01
-size = 95
-epochs = 350
-batch_size = 50
-activation1 = 'softmax'
-activation2 = 'tanh'
-activation3 = 'tanh'
-Dropout1=0.2
-Dropout2=0.2
+learning_rate = 0.003
+size = 70
+epochs = 500
+batch_size = 70
+activation1 = 'linear'
+activation2 = 'softsign'
+activation3 = 'relu'
+Dropout1=0.35
+Dropout2=0.4
 
 
 # create model
@@ -161,7 +161,7 @@ lstm_custom2 = load_model('D:/GitHub/ML_For_Finance/Machine Learning/Code/models
 
 # evaluate
 print('\n# Evaluate on test data')
-results1 = lstm_custom1.evaluate(X_test, y_test, batch_size=100)
+results1 = lstm_custom2.evaluate(X_test, y_test, batch_size=100)
 print('test mse', results1)
 
 # plot loss
