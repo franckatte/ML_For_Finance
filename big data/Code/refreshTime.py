@@ -55,6 +55,19 @@ def  resample(df,r_times):
     
  
 def synchro_data(dfs):
+    '''
+        return DataFrame of synchronise data
+        ------------
+        dfs(list): list of dataframes
+        
+        Return
+        ------------
+        DF(DataFrame): contain the price at each refresh time
+        row : refesh time
+        columns : market
+        
+        
+    '''
     tau = refresh_time(dfs)
     num_market= len(dfs)
     n=len(tau)
@@ -66,7 +79,7 @@ def synchro_data(dfs):
         names.append(market.columns[0])
         indices=market.index
         Data[m] = np.array([market.iloc[indices<tau[i]][-1] for i in range(len(tau))])
-        
+    Data = Data.T  
     DF = pd.DataFrame(data=Data,index=tau,columns=names)
     return DF
         
