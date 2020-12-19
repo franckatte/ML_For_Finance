@@ -12,8 +12,8 @@ import pandas as pd
 import numpy as np
 from keras.models import load_model
 
-df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv',sep = ","
-                 ,parse_dates = True,index_col = 0 )
+#df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv',sep = ","
+#                 ,parse_dates = True,index_col = 0 )
 
 
 def sub_range(df,nb_years = None):
