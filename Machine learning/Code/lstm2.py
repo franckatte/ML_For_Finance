@@ -48,21 +48,21 @@ cpcv = CPCV(X_train0, n_split = 6, n_folds = 2, purge = 60, embargo = 1)
 # callbacks
 earlystopping = EarlyStopping(monitor="val_loss",patience = 10,restore_best_weights = True)
 
-#### Model 1 custom : 1 Bivariate
+#### Model 1 custom : 1LSTM dropout + 1 Bivariate
 
 
-lstmcustom = KerasRegressor(build_fn = LSTM_dropout_bilstm)
+lstmbilstm = KerasRegressor(build_fn = LSTM_dropout_bilstm)
 
 # Define the parameters to try out
 params1 = {'time_steps':[time_steps],'nb_features':[nb_features],'output_dim':[output_dim],
-           'size':np.arange(10,100,5),'activation1': ['softmax','relu','softsign','tanh'], 'activation2' : ['softmax','relu','softsign','tanh'],
-           'activation3': ['linear', 'tanh','selu'],'epochs': [300]
-           ,'batch_size': np.arange(10,200,10),'learning_rate': np.arange(0.001,0.3,0.001)
-           ,'Dropout1':np.arange(0,0.5,0.05)
+           'size':np.arange(10,100,10),'activation1': ['softmax','relu','softsign','tanh'], 'activation2' : ['softmax','relu','softsign','tanh'],
+           'activation3': ['linear', 'tanh','selu'],'epochs': [250]
+           ,'batch_size': np.arange(10,100,10),'learning_rate': np.arange(0.001,0.01,0.001)
+           ,'Dropout1':np.arange(0,0.5,0.1)
            }
 
 # Create a randomize search cv object passing in the parameters to try
-random_search1 = RandomizedSearchCV(lstmcustom, param_distributions = params1, cv = cpcv,n_jobs = 3,n_iter=100)
+random_search1 = RandomizedSearchCV(lstmbilstm, param_distributions = params1, cv = cpcv,n_jobs = 3,n_iter=100)
 
 # Search for best combinations
 random_search1.fit(X_train,y_train)
@@ -85,14 +85,14 @@ Dropout1=0.2
 lstm_custom1 =  LSTM_dropout_bilstm(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2,activation3,Dropout1)
 
 # checkpoint
-#modelCheckpoint1 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_vanilla_lstm10.hdf5',  save_best_only = True)
+modelCheckpoint1 = ModelCheckpoint(filepath = 'D:/GitHub/ML_For_Finance/Machine Learning/Code/models/best_vanilla_lstm10.hdf5',  save_best_only = True)
 
 history1 = lstm_custom1.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 
-                          validation_data=(X_test, y_test)#,callbacks = [modelCheckpoint1]
+                          validation_data=(X_test, y_test),callbacks = [modelCheckpoint1]
                           ,verbose = 1)
 
 # load best model
-lstm_custom1 = load_model('D:/GitHub/ML_For_Finance/Machine Learning/Code/models/best_vanilla_lstm10.hdf5')
+lstm_custom1 = load_model('D:/GitHub/ML_For_Finance/Machine Learning/Code/models/lstm_drop_bilstm10.hdf5')
 
 # evaluate
 print('\n# Evaluate on test data')
@@ -113,17 +113,17 @@ yields_rmse(lstm_custom1,X_test,y_test)
 
 
 
-#### Model 2 custom : 1 LSTM Dropout+ 1 Bivariate Dropout
+#### Model 2 custom : 2 Bivariate Dropout
 
 
 lstmcustom2 = KerasRegressor(build_fn = custom1_LSTM_dropout)
 
 # Define the parameters to try out
 params2 = {'time_steps':[time_steps],'nb_features':[nb_features],'output_dim':[output_dim],
-           'size':np.arange(10,100,5),'activation1': ['softmax','relu','softsign','tanh'], 'activation2' : ['softmax','relu','softsign','tanh'],
-           'activation3': ['linear', 'tanh','selu'],'epochs': [300]
-           ,'batch_size': np.arange(10,200,10),'learning_rate': np.arange(0.001,0.3,0.001)
-           ,'Dropout1':np.arange(0,0.5,0.05),'Dropout2':np.arange(0,0.5,0.05)
+           'size':np.arange(10,100,10),'activation1': ['softmax','relu','softsign','tanh'], 'activation2' : ['softmax','relu','softsign','tanh'],
+           'activation3': ['linear', 'tanh','selu'],'epochs': [250]
+           ,'batch_size': np.arange(10,100,10),'learning_rate': np.arange(0.001,0.01,0.001)
+           ,'Dropout1':np.arange(0,0.5,0.1),'Dropout2':np.arange(0,0.5,0.1)
            }
 
 # Create a randomize search cv object passing in the parameters to try
@@ -135,14 +135,14 @@ random_search2.fit(X_train,y_train)
 # results
 random_search2.best_params_
 
-learning_rate = 0.003
-size = 70
+learning_rate = 0.007
+size = 20
 epochs = 500
-batch_size = 70
-activation1 = 'linear'
-activation2 = 'softsign'
-activation3 = 'relu'
-Dropout1=0.35
+batch_size = 50
+activation1 = 'selu'
+activation2 = 'softmax'
+activation3 = 'softsign'
+Dropout1=0.0
 Dropout2=0.4
 
 
@@ -150,14 +150,14 @@ Dropout2=0.4
 lstm_custom2 =  custom1_LSTM_dropout(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2,activation3,Dropout1,Dropout2)
 
 # checkpoint
-#modelCheckpoint1 = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_vanilla_lstm10.hdf5',  save_best_only = True)
+modelCheckpoint1 = ModelCheckpoint(filepath = 'D:/GitHub/ML_For_Finance/Machine Learning/Code/models/2_bi_lstm_drop10.hdf5',  save_best_only = True)
 
 history2 = lstm_custom2.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 
-                          validation_data=(X_test, y_test)#,callbacks = [modelCheckpoint1]
+                          validation_data=(X_test, y_test),callbacks = [modelCheckpoint1]
                           ,verbose = 1)
 
 # load best model
-lstm_custom2 = load_model('D:/GitHub/ML_For_Finance/Machine Learning/Code/models/best_vanilla_lstm10.hdf5')
+lstm_custom2 = load_model('D:/GitHub/ML_For_Finance/Machine Learning/Code/models/2_bi_lstm_drop10.hdf5')
 
 # evaluate
 print('\n# Evaluate on test data')
@@ -167,7 +167,7 @@ print('test mse', results1)
 # plot loss
 train_test_folder = 'D:/GitHub/ML_For_Finance/Machine Learning/Code/figures/LSTM//train_test/'
 
-plot_rmse(history2,train_test_folder,'bilstm_drop_train_test_RMSE 10')
+plot_rmse(history2,train_test_folder,'2_bi_lstm_drop10_train_test_RMSE 10')
 
 # RMSE per Maturity
 ## train
