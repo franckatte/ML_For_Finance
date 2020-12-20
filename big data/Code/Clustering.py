@@ -13,6 +13,11 @@ import community as community_louvain
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 
+#pip install scikit-network
+
+from sknetwork.clustering import Louvain
+
+
 
 def zero_diag_matrix(M):
     n=len(M)
@@ -23,15 +28,15 @@ def zero_diag_matrix(M):
     return M
 
 
-def creat_graph(corr_matrix):
+def louvain_label(corr_matrix):
     '''
-        return DataFrame of synchronise data
+        return label of Louvain clustering
         ------------
         corr_matrix(DataFrame): correlation matrix of the market DataFrame
         
         Return
         ------------
-        G(networkx Graph): graph unidirect with the market and the weight are the correlation
+        Label(DataFrame): columns : market / row : label
         
     '''
     
@@ -41,26 +46,14 @@ def creat_graph(corr_matrix):
     
     Corr = zero_diag_matrix(corr_matrix)
     
-    G = nx.from_numpy_matrix(Corr.values,create_using=nx.Graph())
-    label_mapping = {idx: val for idx, val in enumerate(Corr.columns)}
-    G = nx.relabel_nodes(G, label_mapping)
+    louvain = Louvain()
+    labels = louvain.fit_transform(Corr)
+    market_name=Corr.columns
+    DF = pd.DataFrame(data=labels,index=['labels'],columns = market_name)
     
-    return G
+    return DF
 
-def get_clusters(G):
-    '''
-        return DataFrame with cluster_label
-        ------------
-        G(networkx Graph): graph unidirect with the market and the weight are the correlation
-        
-        Return
-        ------------
-        Label(DataFrame): columns : market / row : label
-        
-    '''
-    partition = community_louvain.best_partition(G)
-    
-    return partition
+
 
 
     
