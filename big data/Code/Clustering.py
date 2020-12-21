@@ -66,6 +66,25 @@ def get_clusters(G):
     
     
     
+def get_clusters(C,q):
+    
+    
+    lbda_p = (1 + np.sqrt(q))**2
+    lbda_m = (1 - np.sqrt(q))**2
+    
+    eigen_val, eigen_vec = np.linalg.eig(C.values)
+    
+    # random mode
+    index = np.where(eigen_val <= lbda_p)[0]
+    lbda_random = eigen_val[index]
+    mu_random = eigen_vec[index]
+    
+    
+    
+    # market mode
+    index = np.where(eigen_val <= max(eigen_val))[0]
+    lbda_m = eigen_val[index]
+    mu_m = eigen_vec[index]
     
     
     
