@@ -19,7 +19,6 @@ from model_generators import plot_yields
 
 from model_custom import LSTM_dropout_bilstm,custom1_LSTM_dropout
 
-import matplotlib.pyplot as plt
 
 
 
