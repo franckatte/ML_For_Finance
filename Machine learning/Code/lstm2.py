@@ -19,7 +19,7 @@ from model_generators import plot_yields
 
 from model_custom import LSTM_dropout_bilstm,custom1_LSTM_dropout
 
-
+import matplotlib.pyplot as plt
 
 
 
@@ -70,14 +70,14 @@ random_search1.fit(X_train,y_train)
 # results
 random_search1.best_params_
 
-learning_rate = 0.04857878787878789
-size = 95
-epochs = 350
-batch_size = 50
-activation1 = 'softmax'
-activation2 = 'tanh'
-activation3 = 'tanh'
-Dropout1=0.2
+learning_rate = 0.001
+size = 50
+epochs = 500
+batch_size = 90
+activation1 = 'selu'
+activation2 = 'softmax'
+activation3 = 'softsign'
+Dropout1=0.4
 
 
 
@@ -85,7 +85,7 @@ Dropout1=0.2
 lstm_custom1 =  LSTM_dropout_bilstm(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2,activation3,Dropout1)
 
 # checkpoint
-modelCheckpoint1 = ModelCheckpoint(filepath = 'D:/GitHub/ML_For_Finance/Machine Learning/Code/models/best_vanilla_lstm10.hdf5',  save_best_only = True)
+modelCheckpoint1 = ModelCheckpoint(filepath = 'D:/GitHub/ML_For_Finance/Machine Learning/Code/models/lstm_drop_bilstm10.hdf5',  save_best_only = True)
 
 history1 = lstm_custom1.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 
                           validation_data=(X_test, y_test),callbacks = [modelCheckpoint1]
@@ -96,13 +96,13 @@ lstm_custom1 = load_model('D:/GitHub/ML_For_Finance/Machine Learning/Code/models
 
 # evaluate
 print('\n# Evaluate on test data')
-results1 = lstm_custom1.evaluate(X_test, y_test, batch_size=100)
+results1 = lstm_custom1.evaluate(X_test, y_test, batch_size=90)
 print('test mse', results1)
 
 # plot loss
 train_test_folder = 'D:/GitHub/ML_For_Finance/Machine Learning/Code/figures/LSTM//train_test/'
 
-plot_rmse(history1,train_test_folder,'custom1_train_test_RMSE 10')
+plot_rmse(history1,train_test_folder,'lstm_drop_bilstm_train_test_RMSE 10')
 
 # RMSE per Maturity
 ## train
