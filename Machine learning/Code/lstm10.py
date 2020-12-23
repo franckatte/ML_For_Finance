@@ -71,7 +71,6 @@ random_search1.best_params_
 learning_rate = 0.01
 size = 13
 epochs = 500
-dropout = 0.1
 batch_size = 100
 activation1 = 'softmax'
 activation2 = 'linear'

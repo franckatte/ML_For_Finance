@@ -12,8 +12,11 @@ import numpy as np
 from keras.layers import Input, Dense, LSTM, Dropout,Bidirectional, BatchNormalization, GaussianNoise
 from keras.models import Model
 from keras.optimizers import Adam
-
 import pandas as pd
+from keras import backend as K
+import tensorflow as tf
+from sklearn.metrics import roc_curve, auc
+
 
 ##create denoising_ae model
 def create_denoising_ae(input_dim, output_dim,learning_rate,std,encoding_dim,activation1,activation2):
@@ -77,6 +80,34 @@ def vanilla_LSTM(time_steps,nb_features,output_dim,learning_rate,size,activation
 
     return lstm
 
+
+def vanilla_LSTM_classifier(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2):
+    # Create an Adam optimizer with the given learning rate
+    opt = Adam(lr = learning_rate)
+    # input data
+    input_layer = Input(shape = (time_steps,nb_features))
+   
+    # batch normalization
+    BN = BatchNormalization()(input_layer)
+    
+    
+    # hidden layers
+    hidden =  LSTM(size , activation = activation1)(BN)
+    
+    # batch normalization
+    BN = BatchNormalization()(hidden)
+    
+    # output layer
+    output_layer = Dense(output_dim, activation = activation2)(BN)
+    
+    # model
+    lstm = Model(input_layer, output_layer)
+    
+    # compile the model
+    lstm.compile(optimizer = opt, loss= 'binary_crossentropy',  metrics= [tf.keras.metrics.Precision(thresholds = 0.5),'accuracy'])
+
+    return lstm
+
 ##create stacked LSTM model
 def stacked_LSTM(time_steps,nb_features,output_dim,learning_rate,size1,size2,activation1,activation2,activation3):
     # Create an Adam optimizer with the given learning rate
@@ -111,6 +142,39 @@ def stacked_LSTM(time_steps,nb_features,output_dim,learning_rate,size1,size2,act
     
     return lstm
 
+def stacked_LSTM_classifier(time_steps,nb_features,output_dim,learning_rate,size1,size2,activation1,activation2,activation3):
+    # Create an Adam optimizer with the given learning rate
+    opt = Adam(lr = learning_rate)
+    # input data
+    input_layer = Input(shape = (time_steps,nb_features))
+    
+    # batch normalization
+    BN = BatchNormalization()(input_layer)
+    
+    
+    # hidden layers
+    hidden =  LSTM(size1 , activation = activation1, return_sequences=True)(BN)
+    
+    # bactch normalization
+    BN = BatchNormalization()(hidden)
+    
+    # hidden layers
+    hidden =  LSTM(size2 , activation = activation2,)(BN)
+    
+    # batch normalization
+    BN = BatchNormalization()(hidden)
+    
+    # output layer
+    output_layer = Dense(output_dim, activation = activation3)(BN)
+    
+    # model
+    lstm = Model(input_layer, output_layer)
+    
+     # compile the model
+    lstm.compile(optimizer = opt, loss= 'binary_crossentropy', metrics= [tf.keras.metrics.Precision(thresholds = 0.5)])
+    
+    return lstm
+
 ##create bivariate LSTM model
 def bi_LSTM(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2):
     # Create an Adam optimizer with the given learning rate
@@ -136,6 +200,33 @@ def bi_LSTM(time_steps,nb_features,output_dim,learning_rate,size,activation1,act
     
      # compile the model
     lstm.compile(optimizer = opt, loss = 'mean_squared_error')
+
+    return lstm
+
+def bi_LSTM_classifier(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2):
+    # Create an Adam optimizer with the given learning rate
+    opt = Adam(lr = learning_rate)
+    # input data
+    input_layer = Input(shape = (time_steps,nb_features))
+    
+    # batch normalization
+    BN= BatchNormalization()(input_layer)
+        
+    # hidden layers
+    hidden =  Bidirectional(LSTM(size , activation = activation1))(BN)
+    
+    # batch normalization
+    BN = BatchNormalization()(hidden)
+    
+    # output layer
+    output_layer = Dense(output_dim, activation = activation2)(BN)
+    
+
+    # model
+    lstm = Model(input_layer, output_layer)
+    
+     # compile the model
+    lstm.compile(optimizer = opt, loss = 'binary_crossentropy',metrics = [tf.keras.metrics.Precision(thresholds = 0.5)])
 
     return lstm
 
@@ -167,6 +258,29 @@ def plot_yields(model,X,y,folder, ticker):
         plt.savefig(folder + "obs_pred-" + ticker + "-" + term + ".pdf")
         plt.show()
 
+
+
+def plot_roc(model,X,y,folder, ticker):
+    
+    terms = ['1J', '2J','3J', '4J', '5J', '6J','7J', '8J', '9J', '10J', '15J', '20J', '30J']
+    pred_terms = [term +  " pred" for term in terms]
+    
+    y_pred = pd.DataFrame(model.predict(X),columns = pred_terms, index = y.index)
+    y = y.join(y_pred)
+    
+    for  i,term in enumerate(terms):
+        plt.figure(figsize = (10,6))
+        
+        fpr_rf, tpr_rf, thresholds_rf = roc_curve( y.loc[:,term],  y.loc[:,term + " pred"])
+        auc_rf = auc(fpr_rf, tpr_rf)
+        
+        plt.plot(fpr_rf, tpr_rf, label='RF (area = {:.3f})'.format(auc_rf))
+        plt.xlabel('False positive rate')
+        plt.ylabel('True positive rate')
+        plt.title('ROC curve')
+        plt.legend(loc='best')
+        plt.show()
+
 def yields_rmse(model,X,y):
     
     n = 13
@@ -180,4 +294,30 @@ def yields_rmse(model,X,y):
         res.append(rmse)
     
     return pd.DataFrame(res,columns = ['RMSE'],index = terms)
+
+
+
+def threshold_binary_accuracy(y_true, y_pred,threshold = 0.8):
+  
+    if K.backend() == 'tensorflow':
+        return K.mean(K.equal(y_true, K.cast(K.less(y_pred,threshold), y_true.dtype)))
+    else:
+        return K.mean(K.equal(y_true, K.less(y_pred,threshold)))
+
+
+
+
+def yields_accuracy(model,X,y,threshold = 0.5):
+    
+    n = 13
+    terms = ['1J', '2J','3J', '4J', '5J', '6J','7J', '8J', '9J', '10J', '15J', '20J', '30J']
+
+    y_preds = model.predict(X)
+    res = []
+    
+    for i in range(n):
+        acc = threshold_binary_accuracy(y[:,i], y_preds[:,i],threshold)
+        res.append(acc)
+    
+    return pd.DataFrame(res,columns = ['Accuracy'],index = terms)
     

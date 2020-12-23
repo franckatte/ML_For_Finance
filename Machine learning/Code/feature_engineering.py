@@ -90,17 +90,18 @@ def denoiser(df,backwards,model_path):
     
     autoencoder = load_model(model_path)
     df2 = df.iloc[:,df.columns.str.contains('J')].copy()
+    df3 = df.iloc[:,~df.columns.str.contains('J')].copy()
 
     for l in backwards:
         name =  "(t-" + str(l) + ")"
         df2.iloc[:,df2.columns.str.contains(name, regex = False)] = autoencoder.predict(df2.iloc[:,df2.columns.str.contains(name, regex = False)].to_numpy())
     
-    return df2
+    return df3.join(df2)
         
 
     
     
-def supervised(df,growth_freqs,backwards,denoise = True,model_path = None,scale_eco = True,nb_years = None):
+def supervised(df,growth_freqs,backwards,denoise = True,model_path = None,scale_eco = True,nb_years = None,binary = False):
     '''
         create supervised learning data for a lead time
         
@@ -152,7 +153,15 @@ def supervised(df,growth_freqs,backwards,denoise = True,model_path = None,scale_
     
     if scale_eco == True:
         df2.iloc[:,~df2.columns.str.contains('J')] = df2.iloc[:,~df2.columns.str.contains('J')].apply(lambda x: (x - x.min())/(x.max() - x.min())).copy()
-
+    
+    if binary == True:
+        l = backwards[0]
+        columns = list(y.columns)
+        for c in columns:
+            col = c + " (t-" + str(l) + ")"
+            y[c] = (y[c] - X[col]).apply(lambda x: 1 if x > 0 else 0).copy()
+            
+        
     return X,y
     
 
