@@ -23,7 +23,7 @@ def zero_diag_matrix(M):
     n=len(M)
     
     for i in range(n):
-        M.iloc[i,i]=0
+        M[i,i]=0
         
     return M
 
@@ -32,7 +32,7 @@ def louvain_label(corr_matrix):
     '''
         return label of Louvain clustering
         ------------
-        corr_matrix(DataFrame): correlation matrix of the market DataFrame
+        corr_matrix(numpy): correlation matrix of the market array
         
         Return
         ------------
@@ -48,10 +48,10 @@ def louvain_label(corr_matrix):
     
     louvain = Louvain()
     labels = louvain.fit_transform(Corr)
-    market_name=Corr.columns
-    DF = pd.DataFrame(data=labels,index=['labels'],columns = market_name)
     
-    return DF
+    
+    
+    return labels
 
 
 
@@ -61,7 +61,7 @@ def louvain_label(corr_matrix):
     
 def get_clusters(C,q):
     
-    
+    names = C.columns
     lbda_p = (1 + np.sqrt(q))**2
     lbda_m = (1 - np.sqrt(q))**2
     
@@ -72,12 +72,20 @@ def get_clusters(C,q):
     lbda_random = eigen_val[index]
     mu_random = eigen_vec[index]
     
-    
+    C_random = np.sum([lbda_random[i]*mu_random[i].T@mu_random[i] for i in range(len(index))  ])
     
     # market mode
-    index = np.where(eigen_val <= max(eigen_val))[0]
+    index = np.where(eigen_val == max(eigen_val))[0]
     lbda_m = eigen_val[index]
     mu_m = eigen_vec[index]
+    
+    C_market = lbda_m*mu_m.T@mu_m
+    
+    C0 = C_random+C_market
+    
+    cluster = louvain_label(C0)
+    
+    return cluster
     
     
     
