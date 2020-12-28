@@ -41,7 +41,7 @@ def get_GMVP(data_harmonized):
     
     return w,mean,standart_deviation
 
-def get_profit_vanilla(w,dfs):
+def get_return_vanilla(w,dfs):
     '''
     
     ----------
@@ -107,7 +107,7 @@ def get_Louvain_GMVP(data_harmonized):
     Data_cluster = pd.DataFrame(data = Value_cluster,columns=names_cluster,index=date)
         
     w_clust,mu_cluster,std_cluster = get_GMVP(Data_cluster)
-    return w_clust,mu_cluster,std_cluster,Cluster,weight_louvain
+    return w_clust,mu_cluster,std_cluster,Cluster,weight_louvain,C
         
         
     
@@ -122,13 +122,14 @@ class Louvain_GMVP :
     '''
     
     def __init__(self,data_harmonized):
-        w_clust,mu_cluster,std_cluster,Cluster,weight_louvain = get_Louvain_GMVP(data_harmonized)
+        w_clust,mu_cluster,std_cluster,Cluster,weight_louvain,C = get_Louvain_GMVP(data_harmonized)
         
         self.w_cluster = w_clust
         self.mu_cluster = mu_cluster
         self.std_cluster=std_cluster
         self.label = Cluster
         self.w_louvain = weight_louvain
+        self.correlation = C
         
         
     def get_return(self,dfs,names):
