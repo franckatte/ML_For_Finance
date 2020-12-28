@@ -58,7 +58,7 @@ def get_return_vanilla(w,dfs):
             
         profit+= (df.iloc[-1].values - df.iloc[0].values)/(df.iloc[0].values)*w[i]
         
-    return profit
+    return profit[0]
             
 
 
@@ -143,7 +143,7 @@ class Louvain_GMVP :
             
             retour+= (df.iloc[-1].values - df.iloc[0].values)/(df.iloc[0].values)*self.w_cluster[label]*self.w_louvain[label][nom].values
             
-        self.retour = retour
+        self.retour = retour[0]
         
         
 
