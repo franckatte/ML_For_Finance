@@ -23,18 +23,19 @@ def impor_data(market_name,day,path):
     return sortie
     
 
-def nombre_cluster(louvain,market_name):
+def nombre_cluster(louvain,df):
+    market_name=df.columns
     n=len(market_name)
-    M = np.zeros((n,n))
+    
     
     cluster = louvain.label
     for i in range(n-1):
         index = np.where(cluster[i]==cluster[i+1:])
         for j in index:
-            M[i,j]+=1
-            M[j,i]+=1
-            
-    return M
+            df.iloc[i,j]+=1
+            df.iloc[j,i]+=1
+               
+    return df
     
     
     
@@ -50,7 +51,8 @@ class daily_back_testing :
         self.market_name=market_name
         n=len(market_name)
         self.correlation=np.zeros((n,n))
-        self.louvain_cluster = np.zeros((n,n))
+        temp1= np.zeros((n,n))
+        self.louvain_cluster =pd.DataFrame(data=temp1,columns=market_name,index=market_name)
         self.nombre_test=0
         self.data_j1=impor_data(market_name,day0,path)
         
@@ -63,15 +65,16 @@ class daily_back_testing :
         data_j2 = impor_data(self.market_name,day_j2,self.path_perso)
         
         louvain = Louvain_GMVP(data_harmonized_j1)
-        self.V_louvain.append(self.V_louvain[-1]* louvain.get_return(data_j2,self.market_name))
+        louvain.get_return(data_j2,self.market_name)
+        self.V_louvain.append(self.V_louvain[-1]* (1+louvain.retour))
         
         self.correlation+= louvain.correlation
-        self.louvain_cluster = nombre_cluster(louvain,self.market_name)
-        self.nombre+=1
+        self.louvain_cluster = nombre_cluster(louvain,self.louvain_cluster)
+        self.nombre_test+=1
         
         
         vanilla_w,_,_ = get_GMVP(data_harmonized_j1)
-        self.V_vanilla.append(self.V_vanilla[-1]*get_return_vanilla(vanilla_w,data_j2) )
+        self.V_vanilla.append(self.V_vanilla[-1]*(1+get_return_vanilla(vanilla_w,data_j2)) )
         
         self.data_j1=data_j2
         self.date_path.append(day_j2)
