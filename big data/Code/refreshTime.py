@@ -51,13 +51,14 @@ def refresh_time(dfs):
 def  resample(df,r_times):
     
      index = df.index
-     
+     name = df.columns
      sampled_index = [dask.delayed(max)(index[index<=t] ) for t in r_times]
      sampled_index = pd.Index(dask.compute(*sampled_index))
      
      df2 = df.loc[sampled_index]
+     df2 = df2.loc[~df2.index.duplicated(keep = "last")]
      
-     return df2.loc[~df2.index.duplicated(keep = "last")]
+     return pd.DataFrame(data=df2.values,index=r_times,columns=name)
  
     
  
@@ -72,7 +73,7 @@ def synchro_data(dfs):
         
         Return
         ------------
-        DF(DataFrame): contain the price at each refresh time
+        list of DF(DataFrame): contain the price at each refresh time
         row : refesh time
         columns : market
         
@@ -88,11 +89,29 @@ def synchro_data(dfs):
     return dask.compute(*res)
         
     
+def harmoniz_data(dfs):
+    '''
+        return DataFrame of synchronise data
+        ------------
+        dfs(list): list of dataframes
+        
+        Return
+        ------------
+        DF(DataFrame): contain the price at each refresh time
+        row : refesh time
+        columns : market
+        
+        
+    '''
+    data00=synchro_data(dfs)
+    test = [data00[i] for i in range(len(data00))]
+    tab = pd.concat(test,axis=1)
+    
+    return tab
     
     
     
-    
- 
+'''
     
  #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -144,7 +163,7 @@ tab = pd.concat(test)
 
  
     
- 
+'''
     
  
     
