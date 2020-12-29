@@ -20,6 +20,7 @@ from sknetwork.clustering import Louvain
 
 
 def zero_diag_matrix(M):
+    #We put zeros on the matrix diagonal
     n=len(M)
     
     for i in range(n):
@@ -36,15 +37,11 @@ def louvain_label(corr_matrix):
         
         Return
         ------------
-        Label(DataFrame): columns : market / row : label
+        Label(Numpy): array of the louvain label
         
     '''
     
-    #input : correlation matrix of the market DataFrame
-    #
-    #return : the graph with weight of each link
-    
-    Corr = zero_diag_matrix(corr_matrix)
+    Corr = zero_diag_matrix(corr_matrix) #we put 0 on the diagonal to avoid intern edge
     
     louvain = Louvain()
     labels = louvain.fit_transform(Corr)
@@ -60,8 +57,22 @@ def louvain_label(corr_matrix):
     
     
 def get_clusters(C,q):
+    '''
+    
+
+    Parameters
+    ----------
+    C : correlation matrix
+    q : number of stock on the number of refresh time
+
+    Returns
+    -------
+    cluster : the label of the louvain clustering
+
+    '''
     
     names = C.columns
+    #We define the theoritical limite of the correlation
     lbda_p = (1 + np.sqrt(q))**2
     lbda_m = (1 - np.sqrt(q))**2
     
@@ -81,6 +92,7 @@ def get_clusters(C,q):
     
     C_market = lbda_m*mu_m.T@mu_m
     
+    # We compute the filtered correlation matrix
     C0 = C_random+C_market
     
     cluster = louvain_label(C0)
