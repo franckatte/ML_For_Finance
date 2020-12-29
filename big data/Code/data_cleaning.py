@@ -20,6 +20,10 @@ def load_trade(market_name,date,folder_path,tz_exchange = "America/New_York",
     else:
         path_name = folder_path + stock_path + market_name + '/' + str(date)[:10] + '-' + market_name + '-trade.csv.gz'
         DF = pd.read_csv(path_name, compression = 'gzip')[['xltime','trade-price']]
+        
+    
+    if len(DF)==0:
+        return DF
 
     
     DF.index = pd.to_datetime(DF["xltime"],unit = "d",origin = "1899-12-30",utc = True)
