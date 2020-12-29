@@ -12,6 +12,7 @@ from scipy.optimize import minimize
 from Clustering import get_clusters
 
 def minimize_portfolio(w,Sigma):
+    #Fonction to minimize to get GMVP
     return w.T@Sigma@w
 
 def get_GMVP(data_harmonized):
@@ -26,16 +27,22 @@ def get_GMVP(data_harmonized):
     -------
 
     '''
-    return_data = data_harmonized- data_harmonized.shift(1)
+    #We compute the different return of each asset for each refresh time and get its covariance
+    return_data = (data_harmonized- data_harmonized.shift(1))/(data_harmonized.shift(1))
     return_data=return_data.dropna()
+    
+    
     Covariance = return_data.cov()
     
+    #We compute the constrainte that the sum of the weight is 1 and then calculate te portfolio
     cons = ({'type': 'eq', 'fun': lambda x:  np.sum(x)-1.0})
     n=len(Covariance)
     w0 = np.ones(n)/n
     res= minimize(minimize_portfolio, w0, args=Covariance, method='SLSQP',constraints=cons)
     
     w = res.x
+    
+    #We compute the mean and std or the calculated portfolio
     mean = np.mean(return_data,axis=0)@w
     standart_deviation = w.T@Covariance@w
     
@@ -48,14 +55,14 @@ def get_return_vanilla(w,dfs):
     w : array weight of the GMVP
     dfs : list of asset price
 
-    profit of the strategy
+    return of the strategy
     -------
 
     '''
     profit = 0
     i=0
     for df in dfs :
-            
+        #we calculate the return of the portfolio with the sum of each asset time the weight
         profit+= (df.iloc[-1].values - df.iloc[0].values)/(df.iloc[0].values)*w[i]
         
     return profit[0]
@@ -69,12 +76,14 @@ def get_Louvain_GMVP(data_harmonized):
     Function where we get the Louvain cluster, then we apply twice the GMVP
     ----------
     data_harmosized : Pandas data Frame of harmonized asset
-        DESCRIPTION.
+        
 
     Returns weight and performance and label_clustering
     -------
 
     '''
+    
+    #We calculate the parameter for the Louvain Clustering
     names = data_harmonized.columns
     date = data_harmonized.index
     q = len(names)/len(date)
@@ -87,7 +96,7 @@ def get_Louvain_GMVP(data_harmonized):
     names_cluster=[]
     weight_louvain=[]
     
-    
+    #For each cluster we do a GMVP and save the weight and value of the sub portfolio
     for i in range(nb_cluster+1):
         nom = names[Cluster==i]
         datai = data_harmonized[nom]
@@ -97,12 +106,13 @@ def get_Louvain_GMVP(data_harmonized):
         WI = pd.DataFrame(data=wi[np.newaxis,:],columns=nom,index=['weight'])
         
         weight_louvain.append(WI)
+        #We get the value of the cluster
         Value_portfeuille = datai.values@wi
         Value_cluster.append(Value_portfeuille)
         
         names_cluster.append('portfolio '+str(i))
         
-    
+    #We compute the dataframe for the value of each cluster
     Value_cluster = np.array(Value_cluster).T
     Data_cluster = pd.DataFrame(data = Value_cluster,columns=names_cluster,index=date)
         
@@ -122,6 +132,8 @@ class Louvain_GMVP :
     '''
     
     def __init__(self,data_harmonized):
+        #We creat a class to stock easier the different data
+        #We initialized the strategy with 'data_harmonized'
         w_clust,mu_cluster,std_cluster,Cluster,weight_louvain,C = get_Louvain_GMVP(data_harmonized)
         
         self.w_cluster = w_clust
@@ -133,14 +145,14 @@ class Louvain_GMVP :
         
         
     def get_return(self,dfs,names):
-        
+        #We calculate the return get from a list of the asset and the strategy initialized
         nb_clust = self.label
         retour = 0
         
         for df in dfs :
             nom = df.columns[0]
             label = self.label[np.where(nom==names)[0]][0]
-            
+            #to calculate the weight of each return we multiply the label weight time the weight from the cluster GMVP
             retour+= (df.iloc[-1].values - df.iloc[0].values)/(df.iloc[0].values)*self.w_cluster[label]*self.w_louvain[label][nom].values
             
         self.retour = retour[0]
