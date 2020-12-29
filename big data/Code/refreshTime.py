@@ -30,7 +30,7 @@ def refresh_time(dfs):
         tau(numpy array): contain refresh times
         
     '''
-    dates = np.array([df.index.drop_duplicates(keep = 'last') for df in dfs])
+    dates = np.array([df.index.drop_duplicates(keep = 'last') for df in dfs],dtype=object)
     tau = []
     
     while test_date(dates) == False:
@@ -40,7 +40,7 @@ def refresh_time(dfs):
         tau.append(max([min(date) for date in dates]))
 
         #update dates
-        dates = np.array([date[np.where(date > tau[-1])[0]] for date in dates ])
+        dates = np.array([date[np.where(date > tau[-1])[0]] for date in dates ],dtype=object)
         
 
       
@@ -75,7 +75,7 @@ def synchro_data(dfs):
         ------------
         list of DF(DataFrame): contain the price at each refresh time
         row : refesh time
-        columns : market
+        
         
         
     '''
