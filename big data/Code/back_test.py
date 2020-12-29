@@ -27,13 +27,13 @@ def nombre_cluster(louvain,df):
     market_name=df.columns
     n=len(market_name)
     
-    
     cluster = louvain.label
-    for i in range(n-1):
-        index = np.where(cluster[i]==cluster[i+1:])
+    
+    for i in range(n):
+        index = np.where(cluster[i]==cluster)[0]
         for j in index:
             df.iloc[i,j]+=1
-            df.iloc[j,i]+=1
+            
                
     return df
     
@@ -48,6 +48,8 @@ class daily_back_testing :
         self.V_louvain=[100]
         self.date_path=[day0]
         self.path_perso=path
+        self.louvain_return=[]
+        self.vanilla_return=[]
         self.market_name=market_name
         n=len(market_name)
         self.correlation=np.zeros((n,n))
@@ -59,25 +61,29 @@ class daily_back_testing :
         
     def daily_update(self,day_j2):
         
-        
-        data_harmonized_j1 = harmoniz_data(self.data_j1)
-        
         data_j2 = impor_data(self.market_name,day_j2,self.path_perso)
         
-        louvain = Louvain_GMVP(data_harmonized_j1)
-        louvain.get_return(data_j2,self.market_name)
-        self.V_louvain.append(self.V_louvain[-1]* (1+louvain.retour))
-        
-        self.correlation+= louvain.correlation
-        self.louvain_cluster = nombre_cluster(louvain,self.louvain_cluster)
-        self.nombre_test+=1
-        
-        
-        vanilla_w,_,_ = get_GMVP(data_harmonized_j1)
-        self.V_vanilla.append(self.V_vanilla[-1]*(1+get_return_vanilla(vanilla_w,data_j2)) )
-        
-        self.data_j1=data_j2
-        self.date_path.append(day_j2)
+        if min([len(df) for df in data_j2])>0:        
+            data_harmonized_j1 = harmoniz_data(self.data_j1)
+            
+            
+            
+            louvain = Louvain_GMVP(data_harmonized_j1)
+            louvain.get_return(data_j2,self.market_name)
+            self.louvain_return.append(louvain.retour)
+            self.V_louvain.append(self.V_louvain[-1]* (1+louvain.retour))
+            
+            self.correlation+= louvain.correlation
+            self.louvain_cluster = nombre_cluster(louvain,self.louvain_cluster)
+            self.nombre_test+=1
+            
+            
+            vanilla_w,_,_ = get_GMVP(data_harmonized_j1)
+            self.vanilla_return.append(get_return_vanilla(vanilla_w,data_j2))
+            self.V_vanilla.append(self.V_vanilla[-1]*(1+self.vanilla_return[-1]) )
+            
+            self.data_j1=data_j2
+            self.date_path.append(day_j2)
         
         
     def plot_value(self):
@@ -87,7 +93,7 @@ class daily_back_testing :
         plt.plot(self.date_path,self.V_vanilla,label='Vanilla Value')
     
         plt.legend()
-        plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
+        plt.gca().xaxis.set_major_locator(mdates.DayLocator())
         
         plt.gcf().autofmt_xdate()
         plt.show()
