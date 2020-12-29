@@ -23,6 +23,7 @@ def load_trade(market_name,date,folder_path,tz_exchange = "America/New_York",
         
     
     if len(DF)==0:
+        #if there is no data there is no index so the 'normal' way do not work
         return DF
 
     
