@@ -74,7 +74,6 @@ def synchro_data(dfs):
         Return
         ------------
         list of DF(DataFrame): contain the price at each refresh time
-        row : refesh time
         
         
         
@@ -91,7 +90,7 @@ def synchro_data(dfs):
     
 def harmoniz_data(dfs):
     '''
-        return DataFrame of synchronise data
+        Concatenate the list of DataFrame from 'synchro_data'
         ------------
         dfs(list): list of dataframes
         
