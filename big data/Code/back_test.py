@@ -45,12 +45,13 @@ def nombre_cluster(louvain,df):
     
 class daily_back_testing :
     
-    def __init__(self,market_name,path,day0):
+    def __init__(self,market_name,path,list_day0):
         #we initialize the value of each strategy
         self.V_vanilla=[100]
         self.V_louvain=[100]
         #we save the different day we use and the personal path to get the data and the market name
-        self.date_path=[day0]
+        #self.date_path=[day0]
+        self.date_path=[list_day0[-1]]
         self.path_perso=path
         self.market_name=market_name
         n=len(market_name)
@@ -65,16 +66,21 @@ class daily_back_testing :
         #we initialize the number of time we will calculate the different return/strategy value ...
         self.nombre_test=0
         #we import the first data
-        self.data_j1=impor_data(market_name,day0,path)
+        #self.data_j1=impor_data(market_name,day0,path)
+        self.data_1 = []
+        for d in list_day0 :
+            temp1 = impor_data(market_name,d,path)
+            if min([len(df) for df in temp1])>0: 
+                self.data_1.append(harmoniz_data(temp1))
         
         
-    def daily_update(self,day_j2):
+    def daily_update(self,day_j):
         '''
         
 
         Parameters
         ----------
-        day_j2 : date of the day where we want to apply the stategy calibrate on the previous day 
+        day_j : date of the day where we want to apply the stategy calibrate on the previous day 
 
         Returns
         -------
@@ -83,16 +89,16 @@ class daily_back_testing :
         '''
         
         #we import the data of the day 2 and make sure it is not empty
-        data_j2 = impor_data(self.market_name,day_j2,self.path_perso)
+        data_j2 = impor_data(self.market_name,day_j,self.path_perso)
         
         if min([len(df) for df in data_j2])>0:  
             #we resample the stocked data and calibrate the strategies on it
-            data_harmonized_j1 = harmoniz_data(self.data_j1)
+            #data_harmonized_j1 = harmoniz_data(self.data_j1)
             
-            
+            data_calibrate = pd.concat(self.data_1,axis=0)
             #we calibrate the Louvain strategy and calcul the return and actualize 
             #the correlation matrix and the number of time assets are in the same cluster
-            louvain = Louvain_GMVP(data_harmonized_j1)
+            louvain = Louvain_GMVP(data_calibrate)
             louvain.get_return(data_j2,self.market_name)
             self.louvain_return.append(louvain.retour)
             self.V_louvain.append(self.V_louvain[-1]* (1+louvain.retour))
@@ -103,23 +109,25 @@ class daily_back_testing :
             self.nombre_test+=1
             
             #we calibrate the vanilla strategy and get the return
-            vanilla_w,_,_ = get_GMVP(data_harmonized_j1)
+            vanilla_w,_,_ = get_GMVP(data_calibrate)
             self.vanilla_return.append(get_return_vanilla(vanilla_w,data_j2))
             self.V_vanilla.append(self.V_vanilla[-1]*(1+self.vanilla_return[-1]) )
             
             #we replace the a old data day 1 with the data from day 2 to calibrate the future strategy
             
-            self.data_j1=data_j2
-            self.date_path.append(day_j2)
+            temp=harmoniz_data(data_j2)
+            del self.data_1[0]
+            self.data_1.append(temp)
+            self.date_path.append(day_j)
         
         
-    def plot_value(self):
+    def plot_value(self,titre):
         plt.figure(figsize=(13,10))
         #we plot the value of each strategy
         plt.plot(self.date_path,self.V_louvain,label='louvain Value')
         
         plt.plot(self.date_path,self.V_vanilla,label='Vanilla Value')
-        plt.title('Evolution of each strategy value')
+        plt.title('Evolution of each strategy value'+titre)
         plt.legend()
         plt.xlabel('date')
         plt.ylabel('Value')
@@ -127,7 +135,7 @@ class daily_back_testing :
         plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
         
         plt.gcf().autofmt_xdate()
-        plt.savefig('figures/Value_Strategies.pdf')
+        plt.savefig('figures/Value_Strategies'+titre+'.pdf')
         plt.show()
     
     
