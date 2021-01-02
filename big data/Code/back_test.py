@@ -124,7 +124,7 @@ class daily_back_testing :
         plt.xlabel('date')
         plt.ylabel('Value')
         #we calibrate the x axis to print the day
-        plt.gca().xaxis.set_major_locator(mdates.DayLocator())
+        plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
         
         plt.gcf().autofmt_xdate()
         plt.savefig('figures/Value_Strategies.pdf')
