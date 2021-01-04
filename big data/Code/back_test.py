@@ -49,6 +49,8 @@ class daily_back_testing :
         #we initialize the value of each strategy
         self.V_vanilla=[100]
         self.V_louvain=[100]
+        
+        self.number_cluster=[]
         #we save the different day we use and the personal path to get the data and the market name
         #self.date_path=[day0]
         self.date_path=[list_day0[-1]]
@@ -100,6 +102,7 @@ class daily_back_testing :
             #the correlation matrix and the number of time assets are in the same cluster
             louvain = Louvain_GMVP(data_calibrate)
             louvain.get_return(data_j2,self.market_name)
+            self.number_cluster.append(max(louvain.label)+1)
             self.louvain_return.append(louvain.retour)
             self.V_louvain.append(self.V_louvain[-1]* (1+louvain.retour))
             
