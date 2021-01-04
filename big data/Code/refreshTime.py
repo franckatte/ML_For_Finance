@@ -8,6 +8,7 @@ Created on Wed Dec 16 13:39:15 2020
 import numpy as np
 import pandas as pd
 import dask
+dask.config.set(scheduler="processes")
 
 
 
@@ -84,8 +85,8 @@ def synchro_data(dfs):
     for df in dfs:
         res.append(resample(df,tau))
         
-    
-    return dask.compute(*res)
+    #return dask.compute(*res)
+    return dask.compute(res)
         
     
 def harmoniz_data(dfs):
