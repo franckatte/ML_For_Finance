@@ -46,7 +46,7 @@ nb_features = int(X.shape[1]/time_steps)
 output_dim = y.shape[1]
 
 #cpcv splits
-cpcv = CPCV(X_train0, n_split = 6, n_folds = 2, purge = 60, embargo = 1)
+cpcv = CPCV(X_train0, n_split = 6, n_folds = 2, purge = 60)
 
 # callbacks
 earlystopping = EarlyStopping(monitor="val_loss",patience = 10,restore_best_weights = True)

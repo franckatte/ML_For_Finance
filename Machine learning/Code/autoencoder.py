@@ -44,7 +44,7 @@ params = {'input_dim':[input_dim], 'output_dim':[output_dim],'encoding_dim':[2,3
           'learning_rate': [0.01, 0.001],'epochs': [10,50,100,200,500], 'std':[0.001,0.002,0.003]}
 
 # create the CPCV folds indexes
-cpcv = CPCV(X_train_0, n_split = 6, n_folds = 2, purge = 0, embargo = 0)
+cpcv = CPCV(X_train_0, n_split = 6, n_folds = 2, purge = 0)
 
 # Create a randomize search cv object passing in the parameters to try
 random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv,n_jobs = -1)

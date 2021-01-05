@@ -9,7 +9,7 @@ from itertools import combinations
 import numpy as np
 
 
-def purge_embargoCV(X,train_folds,test_folds,purge,embargo):
+def purge_CV(X,train_folds,test_folds,purge):
     '''
         remove embogoing and purging days on a training set
 
@@ -42,8 +42,8 @@ def purge_embargoCV(X,train_folds,test_folds,purge,embargo):
         # index in the full dataset
         max_index = np.where(X.index == max_date)[0][0]
    
-        # after which train data should be kept, define embargo and purge period
-        index_after = max_index + purge + embargo
+        # after which train data should be kept, define purge period
+        index_after = max_index + purge 
         
         # update train/test sets
         X_train = X_train.loc[~X_train.index.isin(X.index[max_index+1:index_after+1])].copy()
@@ -106,7 +106,7 @@ def CPCV(X,n_split,n_folds,purge,embargo):
         
         test_folds = test_groups(train_folds,splits_ids)
         
-        train_index, test_index = purge_embargoCV(X2,train_folds,test_folds,purge,embargo)
+        train_index, test_index = purge_CV(X2,train_folds,test_folds,purge,embargo)
         
     
         # convert time index into positional index
@@ -118,12 +118,3 @@ def CPCV(X,n_split,n_folds,purge,embargo):
     return results
 
 
-# =============================================================================
-# class CPCV:
-#     
-#     def __init__(self,n_split,n_folds,purge,embargo,backwards):
-#     
-#     def get_splits(X)
-#         
-# 
-# =============================================================================
