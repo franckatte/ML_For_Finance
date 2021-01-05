@@ -7,8 +7,10 @@ Created on Wed Dec 16 11:30:02 2020
 """
 
 import pandas as pd
+import dask
+dask.config.set(scheduler="processes")
 
-
+@dask.delayed
 def load_trade(market_name,date,folder_path,tz_exchange = "America/New_York",
                only_regular_trading_hours = True,open_time = "09:30:00",close_time = "16:00:00",is_compressed = False):
     
