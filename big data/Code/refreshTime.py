@@ -43,8 +43,6 @@ def refresh_time(dfs):
         #update dates
         dates = np.array([date[np.where(date > tau[-1])[0]] for date in dates ],dtype=object)
         
-
-      
         
     return tau
 
@@ -76,8 +74,6 @@ def synchro_data(dfs):
         ------------
         list of DF(DataFrame): contain the price at each refresh time
         
-        
-        
     '''
     tau = refresh_time(dfs)
     res = []
@@ -86,7 +82,7 @@ def synchro_data(dfs):
         res.append(resample(df,tau))
         
     #return dask.compute(*res)
-    return dask.compute(res)
+    return dask.compute(res)[0]
         
     
 def harmoniz_data(dfs):
