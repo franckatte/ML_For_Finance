@@ -14,7 +14,7 @@ from statsmodels.tsa import stattools
 from statsmodels.tsa.vector_ar.var_model import VAR
 
 
-df = pd.read_csv('D:/GitHub/ML for Finance project/ML_For_Finance/Machine learning/Data/data_clean.csv',sep = ","
+df = pd.read_csv('D:/GitHub/ML_For_Finance/Machine learning/Data/data_clean.csv',sep = ","
                  ,parse_dates = True,index_col = 0 )
 
 X_day = df.iloc[:,df.columns.str.contains('J')]
@@ -25,19 +25,15 @@ train_size=0.8
 
 
 
-exog = df[['s_eu','s_ch','kof_baro','kof_mpc']]
+exogenous = df[['s_eu','s_ch','kof_baro','kof_mpc']].loc['2015-01-05':]
 
-    
-    
-
-
-
+   
 
 
 
 
     
-def VAR_EXOG_predict(data,index_train,index_test,order):
+def VAR_EXOG_predict(data,len_test,order):
     '''
     
 
@@ -54,20 +50,51 @@ def VAR_EXOG_predict(data,index_train,index_test,order):
 
     '''
     names=data.columns
-    X_train=data.loc[index_train]
-    X_test=data.loc[index_test]
+    X_pred_1j=[]
+    X_pred_5j=[]
+    index=data.index
+    dep = len(index)- len_test
     
+    for i in range(dep,len(index)-5):
+        
     #calibrate the model
-    model = VAR(endog=X_train,exog=exog.loc[index_train]
-                ).fit(order)
+        indice_train = index[i-500:i]
+        
+        
+        model = VAR(endog=data.loc[indice_train],exog=exogenous.loc[indice_train]).fit(order)
     #calculation of the forcast value
-    X_pred= pd.DataFrame(data=model.forecast(model.y,steps=len(index_test),exog_future=exog.loc[index_test]
-                                             ) ,columns=names,index=index_test )
-    
-    
+        
+        ind_test=index[i:i+5]
+        X_predi=model.forecast(model.y,steps=5,exog_future=exogenous.loc[ind_test]) 
+        
+        X_pred_1j.append(X_predi[0])
+        X_pred_5j.append(X_predi[-1])
+        
+        
     
         
-    return X_pred
+    X_pred_1j = pd.DataFrame(data =X_pred_1j ,columns=names,index=index[dep:-5])
+    X_pred_5j = pd.DataFrame(data = X_pred_5j,columns=names,index=index[dep+5:])
+    return X_pred_1j,X_pred_5j
+
+
+    
+    
+
+VAR_EXOG_predict(X_day,200,3)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #Calculate of the different differenciation
 X_day2=X_day.diff().dropna()
@@ -86,11 +113,12 @@ model_var= VAR(X_day3)
 print(model_var.select_order(20))
 
 n=len(X_day3)
-index_train=X_day3.index[:int(n*train_size)]
+index=X_day3.index
+index_train = X_day3.index[:int(n*train_size)]
 index_test=X_day3.index[int(n*train_size):]
 
 #we select p=7 and get the predicted value
-X_pred_diff=VAR_EXOG_predict(X_day3,index_train,index_test,17)
+X_pred_diff,_=VAR_EXOG_predict(X_day3,index,index_test,17)
         
 index=X_day.index    
 names=X_day.columns
@@ -124,7 +152,7 @@ print(model_var.select_order(20))
 #we define the train and test part
 index_train=X_day2.index[:int(n*train_size)]
 index_test=X_day2.index[int(n*train_size):]
-X_pred_diff=VAR_EXOG_predict(X_day2,index_train,index_test,6)
+X_pred_diff,_=VAR_EXOG_predict(X_day2,index_train,index_test,6)
 
 #we calculate the predicted value for d=1
 
@@ -157,7 +185,7 @@ index_test=X_day.index[int(n*train_size):]
 
 #we calculate the predicted value for d=0
 
-X_pred=VAR_EXOG_predict(X_day,index_train,index_test,2)
+X_pred,_=VAR_EXOG_predict(X_day,index_train,index_test,2)
 
 
 
