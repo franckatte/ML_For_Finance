@@ -95,6 +95,8 @@ def get_clusters(C,q):
     # We compute the filtered correlation matrix
     C0 = C_random+C_market
     
+    C0=np.absolute(C0)
+    
     cluster = louvain_label(C0)
     
     return cluster
