@@ -80,7 +80,7 @@ def refresh_time_dask(dfs,date):
     
     d = date.strftime('%Y/%m/%d')
     d_range_dep=pd.date_range(start=d+" 09:30:00",end=d+" 15:30:00",freq='30T',tz ="America/New_York" )
-    d_range_en =  pd.date_range(start=d+" 10:05:00",end=d+" 16:05:00",freq='30T',tz ="America/New_York" )
+    d_range_en =  pd.date_range(start=d+" 10:10:00",end=d+" 16:10:00",freq='30T',tz ="America/New_York" )
     
     n= len(d_range_dep)
     tau_total=[]
@@ -94,7 +94,7 @@ def refresh_time_dask(dfs,date):
         
     tau_t=dask.compute(tau_total)[0]
     
-    limit_d = pd.date_range(start=d+" 10:05:00",end=d+" 15:35:00",freq='30T',tz ="America/New_York" )
+    limit_d = pd.date_range(start=d+" 10:10:00",end=d+" 15:40:00",freq='30T',tz ="America/New_York" )
     tau_t2=[tau_t[0]]
     for j in range(len(limit_d)):
         index = [limit_d[j]<tau_t[j+1][i] for i in range(len(tau_t[j+1]))]
