@@ -117,11 +117,11 @@ class daily_back_testing :
             self.V_vanilla.append(self.V_vanilla[-1]*(1+self.vanilla_return[-1]) )
             
             #we replace the a old data day 1 with the data from day 2 to calibrate the future strategy
-            
+            self.date_path.append(day_j)
             temp=harmoniz_data(data_j2,day_j)
             del self.data_1[0]
             self.data_1.append(temp)
-            self.date_path.append(day_j)
+            
         
         
     def plot_value(self,titre):
