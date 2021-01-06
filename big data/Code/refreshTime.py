@@ -19,7 +19,7 @@ def test_date(dates):
     
     return 0 in a
 
-def refresh_time(dfs):
+def refresh_time_without_dask(dfs):
     '''
         return list of refresh times 
         parameters
@@ -47,6 +47,72 @@ def refresh_time(dfs):
     return tau
 
 @dask.delayed
+def refresh_time(dfs):
+    '''
+        return list of refresh times 
+        parameters
+        ------------
+        dfs(list): list of dataframes
+        
+        Return
+        ------------
+        tau(numpy array): contain refresh times
+        
+    '''
+    dates = np.array([df.index.drop_duplicates(keep = 'last') for df in dfs],dtype=object)
+    tau = []
+    
+    while test_date(dates) == False:
+        
+        # append refresh date
+     
+        tau.append(max([min(date) for date in dates]))
+
+        #update dates
+        dates = np.array([date[np.where(date > tau[-1])[0]] for date in dates ],dtype=object)
+        
+        
+    return tau
+
+
+def refresh_time_dask(dfs,date):
+    
+    
+    d = date.strftime('%Y/%m/%d')
+    d_range_dep=pd.date_range(start=d+" 09:30:00",end=d+" 15:30:00",freq='30T',tz ="America/New_York" )
+    d_range_en =  pd.date_range(start=d+" 10:05:00",end=d+" 16:05:00",freq='30T',tz ="America/New_York" )
+    
+    n= len(d_range_dep)
+    tau_total=[]
+    for i in range(n):
+        
+        datai = [df.iloc[df.index>d_range_dep[i]] for df in dfs]
+        datai = [df.iloc[df.index<=d_range_en[i]] for df in datai]
+        
+        tau_total.append(refresh_time(datai))
+        
+        
+    tau_t=dask.compute(tau_total)[0]
+    
+    limit_d = pd.date_range(start=d+" 10:05:00",end=d+" 15:35:00",freq='30T',tz ="America/New_York" )
+    tau_t2=[tau_t[0]]
+    for j in range(len(limit_d)):
+        index = [limit_d[j]<tau_t[j+1][i] for i in range(len(tau_t[j+1]))]
+        tau_t2.append(np.array(tau_t[j+1])[index])
+    #tau_t2 = [tau_t[j][limit_d[j]<tau_t[j+1][i] for i in range(len(tau_t[j+1]))] for j in range(len(limit_d))]
+    #tau_t2.append(tau_t[0])
+    tau = np.concatenate(tau_t2,axis=0)
+    tau = np.unique(tau)
+    return tau
+
+
+
+
+
+
+
+
+@dask.delayed
 def  resample(df,r_times):
     
      index = df.index
@@ -58,13 +124,14 @@ def  resample(df,r_times):
      df2 = df2.loc[~df2.index.duplicated(keep = "last")]
      
      return pd.DataFrame(data=df2.values,index=r_times,columns=name)
+     
  
     
  
     
  
     
-def synchro_data(dfs):
+def synchro_data(dfs,date):
     '''
         return DataFrame of synchronise data
         ------------
@@ -75,17 +142,18 @@ def synchro_data(dfs):
         list of DF(DataFrame): contain the price at each refresh time
         
     '''
-    tau = refresh_time(dfs)
+    tau = refresh_time_dask(dfs,date)
+    
     res = []
     
     for df in dfs:
         res.append(resample(df,tau))
         
-    #return dask.compute(*res)
+    
     return dask.compute(res)[0]
         
     
-def harmoniz_data(dfs):
+def harmoniz_data(dfs,date):
     '''
         Concatenate the list of DataFrame from 'synchro_data'
         ------------
@@ -99,7 +167,7 @@ def harmoniz_data(dfs):
         
         
     '''
-    data00=synchro_data(dfs)
+    data00=synchro_data(dfs,date)
     test = [data00[i] for i in range(len(data00))]
     tab = pd.concat(test,axis=1)
     
