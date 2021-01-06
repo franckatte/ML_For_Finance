@@ -99,8 +99,7 @@ def refresh_time_dask(dfs,date):
     for j in range(len(limit_d)):
         index = [limit_d[j]<tau_t[j+1][i] for i in range(len(tau_t[j+1]))]
         tau_t2.append(np.array(tau_t[j+1])[index])
-    #tau_t2 = [tau_t[j][limit_d[j]<tau_t[j+1][i] for i in range(len(tau_t[j+1]))] for j in range(len(limit_d))]
-    #tau_t2.append(tau_t[0])
+    
     tau = np.concatenate(tau_t2,axis=0)
     tau = np.unique(tau)
     return tau
@@ -168,8 +167,8 @@ def harmoniz_data(dfs,date):
         
     '''
     data00=synchro_data(dfs,date)
-    test = [data00[i] for i in range(len(data00))]
-    tab = pd.concat(test,axis=1)
+    
+    tab = pd.concat(data00,axis=1)
     
     return tab
     
