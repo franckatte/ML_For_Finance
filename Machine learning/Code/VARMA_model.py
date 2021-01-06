@@ -13,14 +13,17 @@ import statsmodels.api as sm
 from statsmodels.tsa import stattools
 from statsmodels.tsa.vector_ar.var_model import VAR
 
+#path = 'D:/GitHub/ML_For_Finance/Machine learning/Data' #coco desktop
+path = 'D:/GitHub/ML for Finance project/ML_For_Finance/Machine learning/Data' #coco laptop
 
-df = pd.read_csv('D:/GitHub/ML_For_Finance/Machine learning/Data/data_clean.csv',sep = ","
+df = pd.read_csv(path+'/data_clean.csv',sep = ","
                  ,parse_dates = True,index_col = 0 )
 
 X_day = df.iloc[:,df.columns.str.contains('J')]
 
 X_day = X_day.loc['2015-01-05':]
-
+names=X_day.columns
+index = X_day.index
 train_size=0.8
 
 
@@ -53,15 +56,15 @@ def VAR_EXOG_predict(data,len_test,order):
     X_pred_1j=[]
     X_pred_5j=[]
     index=data.index
-    dep = len(index)- len_test
+    dep = int(len(index)- len_test)
     
-    for i in range(dep,len(index)-5):
+    for i in range(dep,int(len(index)-5)):
         
     #calibrate the model
         indice_train = index[i-500:i]
         
         
-        model = VAR(endog=data.loc[indice_train],exog=exogenous.loc[indice_train]).fit(order)
+        model = VAR(endog=data.loc[indice_train],exog=exogenous.loc[indice_train]).fit(order,verbose=False)
     #calculation of the forcast value
         
         ind_test=index[i:i+5]
@@ -79,69 +82,12 @@ def VAR_EXOG_predict(data,len_test,order):
 
 
     
-    
-
-VAR_EXOG_predict(X_day,200,3)
-
-
-
-
-
-
-
-
-
-
 
 
 
 
 #Calculate of the different differenciation
-X_day2=X_day.diff().dropna()
-X_day3=X_day2.diff().dropna()
-
-
-### Differenciation 2
-
-
-
-
-
-
-#we determine the good order in minimizing the AIC criterion
-model_var= VAR(X_day3)
-print(model_var.select_order(20))
-
-n=len(X_day3)
-index=X_day3.index
-index_train = X_day3.index[:int(n*train_size)]
-index_test=X_day3.index[int(n*train_size):]
-
-#we select p=7 and get the predicted value
-X_pred_diff,_=VAR_EXOG_predict(X_day3,index,index_test,17)
-        
-index=X_day.index    
-names=X_day.columns
-
-#we calculate the predicted value for d=2
-
-X_pred = np.zeros(np.shape(X_pred_diff))
-X_pred[0] = -X_day.loc[index_train[-2]] + X_pred_diff.loc[index_test[0]] +2*X_day.loc[index_train[-1]]
-X_pred[1] = -X_day.loc[index_train[-1]] + X_pred_diff.loc[index_test[1]] +2*X_pred[0]
-for i in range(2,len(index_test)):
-    X_pred[i] = -X_pred[i-2] + X_pred_diff.loc[index_test[i]] +2*X_pred[i-1]
-
-X_pred = pd.DataFrame(data= X_pred,columns=names,index=index_test)
-   
-for nom in names:
-        plt.plot(index,X_day[nom],label='True '+ nom)
-        plt.plot(index_test,X_pred[nom],label='predict '+ nom )
-        plt.legend()
-        plt.title('forcast VARIX(17,2,0) ' +nom)
-        plt.savefig('figures/VARIX/forcast of VARIX(17,2,0) '+nom+'.pdf')
-        plt.show()
-        
-        
+X_day2=X_day.diff().dropna()  
         
 ### Differenciation 1
 
@@ -150,27 +96,54 @@ model_var= VAR(X_day2)
 n=len(X_day2)
 print(model_var.select_order(20))
 #we define the train and test part
-index_train=X_day2.index[:int(n*train_size)]
-index_test=X_day2.index[int(n*train_size):]
-X_pred_diff,_=VAR_EXOG_predict(X_day2,index_train,index_test,6)
+
+len_test=int((1-train_size)*len(X_day2))
+X_pred_diff1,X_pred_diff5=VAR_EXOG_predict(X_day2,len_test,6)
+
+index_test1=X_pred_diff1.index
+
 
 #we calculate the predicted value for d=1
 
-X_pred = np.zeros(np.shape(X_pred_diff))  
-X_pred[0] = X_day.loc[index_train[-1]] + X_pred_diff.loc[index_test[0]] 
-    
-for i in range(1,len(index_test)):
-    X_pred[i] = X_pred[i-1] + X_pred_diff.loc[index_test[i]] 
+X_pred1 = np.zeros(np.shape(X_pred_diff1))  
 
-X_pred = pd.DataFrame(data= X_pred,columns=names,index=index_test)  
+
     
+for i in range(len(index_test1)):
+    index_av = index[np.argwhere(index==index_test1[i])[0]-1]
+    X_pred1[i] = X_day.loc[index_av] + X_pred_diff1.loc[index_test1[i]] 
+
+X_pred1 = pd.DataFrame(data= X_pred1,columns=names,index=index_test1)  
+    
+X_pred5 = np.zeros(np.shape(X_pred_diff5))  
+index_test5=X_pred_diff5.index   
+
+for i in range(len(index_test5)):
+    index_av = index[np.argwhere(index==index_test5[i])[0]-1]
+    X_pred5[i] = X_day.loc[index_av] + X_pred_diff5.loc[index_test5[i]] 
+
+X_pred5 = pd.DataFrame(data= X_pred5,columns=names,index=index_test5)  
+    
+
+path_fig='D:/GitHub/ML for Finance project/ML_For_Finance/Machine learning/Code/figures/'
+
 for nom in names:
         plt.plot(index,X_day[nom],label='True '+ nom)
-        plt.plot(index_test,X_pred[nom],label='predict '+ nom )
+        plt.plot(index_test1,X_pred1[nom],label='predict 1 day after '+ nom )
+        plt.plot(index_test5,X_pred5[nom],label='predict 5 day after'+ nom )
         plt.legend()
-        plt.title('forcast VARIMA(6,1,0) ' + nom)
-        plt.savefig('figures/VARIX/forcast of VARIX(6,1,0) '+nom+'.pdf')
+        plt.title('forcast VARIX(6,1) ' + nom)
+        plt.savefig(path_fig+'VARIX/forcast_of_VARIX(6,1)_'+nom+'.pdf')
         plt.show()
+    
+    
+temp1 = (X_day.loc[X_pred1.index]-X_pred1)**2
+RMSE_1_d1 = np.sqrt(np.mean(temp1,axis=0))
+    
+temp5 = (X_day.loc[X_pred5.index]-X_pred5)**2
+RMSE_5_d1 = np.sqrt(np.mean(temp5,axis=0)) 
+    
+
     
     
     
@@ -180,23 +153,31 @@ model_var= VAR(X_day)
 
 print(model_var.select_order(20))
 n=len(X_day)
-index_train=X_day.index[:int(n*train_size)]
-index_test=X_day.index[int(n*train_size):]
 
 #we calculate the predicted value for d=0
-
-X_pred,_=VAR_EXOG_predict(X_day,index_train,index_test,2)
-
-
-
-X_pred = pd.DataFrame(data= X_pred,columns=names,index=index_test)  
+len_test=int((1-train_size)*len(X_day))
+X_pred1,X_pred5=VAR_EXOG_predict(X_day,len_test,2)
+ 
     
 for nom in names:
         plt.plot(index,X_day[nom],label='True '+ nom)
-        plt.plot(index_test,X_pred[nom],label='predict '+ nom )
+        plt.plot(X_pred1.index,X_pred1[nom],label='predict 1 day after '+ nom )
+        plt.plot(X_pred5.index,X_pred5[nom],label='predict 5 day after'+ nom )
         plt.legend()
-        plt.title('forcast VARIMA(2,0,0) ' + nom)
-        plt.savefig('figures/VARIX/forcast of VARIX(2,0,0) '+nom+'.pdf')
+        plt.title('forcast VARIX(2,0) ' + nom)
+        plt.savefig(path_fig+'VARIX/forcast of VARIX(2,0) '+nom+'.pdf')
         plt.show()
     
+temp1 = (X_day.loc[X_pred1.index]-X_pred1)**2
+RMSE_1_d0 = np.sqrt(np.mean(temp1,axis=0))
     
+temp5 = (X_day.loc[X_pred5.index]-X_pred5)**2
+RMSE_5_d0 = np.sqrt(np.mean(temp5,axis=0)) 
+
+
+
+print('RMSE VARIX(6,1) 1day predicted : ',RMSE_1_d1) 
+print('RMSE VARIX(6,1) 5day predicted : ',RMSE_5_d1) 
+
+print('RMSE VARIX(2,0) 1day predicted : ',RMSE_1_d0) 
+print('RMSE VARIX(2,0) 5day predicted : ',RMSE_5_d0) 
