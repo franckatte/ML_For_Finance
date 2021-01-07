@@ -181,3 +181,16 @@ print('RMSE VARIX(6,1) 5day predicted : ',RMSE_5_d1)
 
 print('RMSE VARIX(2,0) 1day predicted : ',RMSE_1_d0) 
 print('RMSE VARIX(2,0) 5day predicted : ',RMSE_5_d0) 
+
+
+
+RMSE = pd.DataFrame(data=[RMSE_1_d1.values,RMSE_5_d1.values,RMSE_1_d0.values,RMSE_5_d0.values],
+                    index= ['RMSE 1 day VARIX(6,1)','RMSE 5 day VARIX(6,1)',
+                              'RMSE 1 day VARIX(2,0)','RMSE 5 day VARIX(2,0)'],
+                    columns = names)
+
+
+
+print(RMSE.to_latex()) 
+
+
