@@ -22,7 +22,7 @@ from keras.models import load_model
 df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv',sep = "," ,parse_dates = True,index_col = 0 )
 df = sub_range(df,5)
 
-train_test_folder = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/figures/autoencoder/'
+train_test_folder = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/00 figures/autoencoder/'
 
 
 X = df.iloc[:,df.columns.str.contains('J')]
@@ -47,7 +47,7 @@ params = {'input_dim':[input_dim], 'output_dim':[output_dim],'encoding_dim':[2,3
 cpcv = CPCV(X_train_0, n_split = 6, n_folds = 2, purge = 0)
 
 # Create a randomize search cv object passing in the parameters to try
-random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv,n_jobs = -1)
+random_search = RandomizedSearchCV(model, param_distributions = params, cv = cpcv,n_jobs = 3)
 
 
 # Search for best combinations
@@ -56,8 +56,7 @@ random_search.fit(X_train,X_train)
 # results
 random_search.best_params_
 
-
-
+# training parameters
 learning_rate = 0.01
 epochs = 500
 encoding_dim = 3
@@ -74,9 +73,9 @@ autoencoder =  create_denoising_ae(input_dim, output_dim,learning_rate,std,encod
 autoencoder.summary()
 
 # Define a callback
-#modelCheckpoint = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_autoencoder2.hdf5',  save_best_only = True)
+modelCheckpoint = ModelCheckpoint(filepath = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_autoencoder2.hdf5',  save_best_only = True)
 
-# fit the model
+# train the model
 history = autoencoder.fit(X_train, X_train, epochs = epochs, batch_size = batch_size, 
                           callbacks = [modelCheckpoint],
                           validation_data=(X_test, X_test),verbose = 1)
