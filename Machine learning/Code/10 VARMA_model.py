@@ -20,7 +20,7 @@ path = 'D:/GitHub/ML_For_Finance/Machine learning/Data' #coco desktop
 #path = 'D:/GitHub/ML for Finance project/ML_For_Finance/Machine learning/Data' #coco laptop
 
 #path_fig='D:/GitHub/ML for Finance project/ML_For_Finance/Machine learning/Code/figures/' #coco laptop
-path_fig='D:/GitHub/ML_For_Finance/Machine learning/Code/figures/' #coco desktop
+path_fig='D:/GitHub/ML_For_Finance/Machine learning/Code/00 figures/' #coco desktop
 
 #We load and select the right data
 
@@ -143,12 +143,21 @@ X_pred5 = pd.DataFrame(data= X_pred5,columns=names,index=index_test5)
 
 #we plot the figures of the True and predicted values
 for nom in names:
-        plt.plot(index,X_day[nom],label='True '+ nom)
+        plt.plot(X_pred1.index,X_day[nom].loc[X_pred1.index],label='True '+ nom)
         plt.plot(index_test1,X_pred1[nom],label='predict 1 day  '+ nom )
+        
+        plt.legend()
+        #plt.title('forcast VARIX(5,1) ' + nom)
+        plt.savefig(path_fig+'VARIX/forcast 1 day of VARIX(5,1) '+nom+'.pdf')
+        plt.show()
+        
+for nom in names:
+        plt.plot(X_pred1.index,X_day[nom].loc[index_test5],label='True '+ nom)
+        
         plt.plot(index_test5,X_pred5[nom],label='predict 5 day '+ nom )
         plt.legend()
-        plt.title('forcast VARIX(6,1) ' + nom)
-        #plt.savefig(path_fig+'VARIX/forcast_of_VARIX(6,1)_'+nom+'.pdf')
+        #plt.title('forcast VARIX(5,1) ' + nom)
+        plt.savefig(path_fig+'VARIX/forcast 5 day of VARIX(5,1) '+nom+'.pdf')
         plt.show()
     
 #We calculate the RMSE for 1 and 5 day prediction
@@ -176,12 +185,21 @@ X_pred1,X_pred5=VAR_EXOG_predict(X_day,len_test,2)
  
 #we plot the figures of the True and predicted values
 for nom in names:
-        plt.plot(index,X_day[nom],label='True '+ nom)
+        plt.plot(X_pred1.index,X_day[nom].loc[X_pred1.index],label='True '+ nom)
         plt.plot(X_pred1.index,X_pred1[nom],label='predict 1 day  '+ nom )
+       
+        plt.legend()
+        #mplt.title('forcast VARIX(2,0) ' + nom)
+        plt.savefig(path_fig+'VARIX/forcast 1 day of VARIX(2,0) '+nom+'.pdf')
+        plt.show()
+        
+for nom in names:
+        plt.plot(X_pred1.index,X_day[nom].loc[X_pred5.index],label='True '+ nom)
+        
         plt.plot(X_pred5.index,X_pred5[nom],label='predict 5 day '+ nom )
         plt.legend()
-        plt.title('forcast VARIX(2,0) ' + nom)
-        #plt.savefig(path_fig+'VARIX/forcast of VARIX(2,0) '+nom+'.pdf')
+        #plt.title('forcast VARIX(2,0) ' + nom)
+        plt.savefig(path_fig+'VARIX/forcast 5 day of VARIX(2,0) '+nom+'.pdf')
         plt.show()
     
 #We calculate the RMSE for 1 and 5 day prediction
