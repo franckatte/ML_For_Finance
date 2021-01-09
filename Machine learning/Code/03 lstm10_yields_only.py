@@ -9,8 +9,7 @@ Created on Mon Dec  7 14:39:20 2020
 from feature_engineering import supervised, reshape
 import pandas as pd
 
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import train_test_split,RandomizedSearchCV
 from keras.callbacks import ModelCheckpoint
 from keras.wrappers.scikit_learn import KerasRegressor
 from tscpcv import CPCV
@@ -21,15 +20,14 @@ from model_generators import plot_yields
 
 # folders paths
 df_path = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv'
-autoencoder_path = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/best_autoencoder.hdf5'
-model_folder = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/models/yields only models/'
-predictions_folder = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/figures/LSTM/yields only models/predictions/'
-train_test_folder = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/figures/LSTM/yields only models/train_test/'
+autoencoder_path = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/00 models/best_autoencoder.hdf5'
+model_folder = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/00 models/yields only models/'
+predictions_folder = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/00 figures/LSTM/yields only models/predictions/'
+train_test_folder = '/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Code/00 figures/LSTM/yields only models/train_test/'
 
 # loading data
 df = pd.read_csv(df_path,sep = ",",parse_dates = True,index_col = 0 )
 times = [1,2,3,4,5,6,7,8,9,10]
-
 
 # create features and transform the data in the supervised format
 X,y = supervised(df,growth_freqs = [20,40,60],backwards = times, scale_eco = True,denoise = True,model_path = autoencoder_path,nb_years = 5)
@@ -51,7 +49,10 @@ cpcv = CPCV(X_train0, n_split = 6, n_folds = 2, purge = 60)
 
 ### models
 
-## vanilla lstm
+# =============================================================================
+# vanilla lstm
+# =============================================================================
+
 # Create a KerasRegressor
 lstm1 = KerasRegressor(build_fn = vanilla_LSTM)
 
@@ -70,11 +71,9 @@ random_search1.fit(X_train,y_train)
 
 # results
 random_search1.best_params_
-
 random_search1.best_score_  # 2.303661633620457e-06
 
 ## training parameters
-
 learning_rate = 0.01
 size = 13
 epochs = 200
@@ -88,6 +87,7 @@ lstm_vanilla =  vanilla_LSTM(time_steps,nb_features,output_dim,learning_rate,siz
 # checkpoint
 modelCheckpoint1 = ModelCheckpoint(filepath = model_folder + 'best_vanilla_lstm10.hdf5',  save_best_only = True)
 
+# train model
 history1 = lstm_vanilla.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 
                           validation_data=(X_test, y_test),callbacks = [modelCheckpoint1],verbose = 1)
 
@@ -103,6 +103,7 @@ print('test mse', results1)
 plot_rmse(history1,train_test_folder,'vanilla_train_test_RMSE 10')
 
 # RMSE per Maturity
+
 ## train
 yields_rmse(lstm_vanilla,X_train,y_train)
 
@@ -110,15 +111,17 @@ yields_rmse(lstm_vanilla,X_train,y_train)
 yields_rmse(lstm_vanilla,X_test,y_test)
 
 
+# =============================================================================
+# stacked LSTM
+# =============================================================================
 
-## stacked LSTM
 # Create a KerasRegressor
 lstm2 = KerasRegressor(build_fn = stacked_LSTM)
 
 # Define the parameters to try out
-params2 = {'time_steps':[time_steps],'nb_features':[nb_features],'output_dim':[output_dim],'size1':[13,50],'size2':[13,50],'activation1': ['softmax'],'activation2': ['linear','softmax', 'tanh'],'activation3': ['linear','tanh']
+params2 = {'time_steps':[time_steps],'nb_features':[nb_features],'output_dim':[output_dim],'size1':[13,50],'size2':[13,50],
+           'activation1': ['softmax'],'activation2': ['linear','softmax', 'tanh'],'activation3': ['linear','tanh']
            ,'batch_size': [50,100],'learning_rate': [0.01,0.001],'epochs': [100,200]}
-
 
 # Create a randomize search cv object passing in the parameters to try
 random_search2 = RandomizedSearchCV(lstm2, param_distributions = params2, cv = cpcv,n_jobs = 3)
@@ -128,11 +131,9 @@ random_search2.fit(X_train,y_train)
 
 # results
 random_search2.best_params_
-
-random_search1.best_score_ # 2.1913959448979456e-06
+random_search2.best_score_ # 2.1913959448979456e-06
 
 ## training parameters
-
 learning_rate = 0.01
 size1 = 13
 size2 = 13
@@ -141,14 +142,14 @@ batch_size = 50
 activation1 = 'softmax'
 activation2 = 'softmax'
 activation3 = 'tanh'
-# create model
 
+# create model
 lstm_stacked =  stacked_LSTM(time_steps,nb_features,output_dim,learning_rate,size1,size2,activation1,activation2,activation3)
 
 # checkpoint
 modelCheckpoint2 = ModelCheckpoint(filepath = model_folder + 'best_stacked_lstm10.hdf5',  save_best_only = True)
 
-
+# train model
 history2 = lstm_stacked.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 
                           validation_data=(X_test, y_test),callbacks = [modelCheckpoint2],verbose = 1)
 
@@ -164,28 +165,16 @@ print('test mse', results2)
 plot_rmse(history2,train_test_folder,'stacked_train_test_RMSE 10')
 
 # RMSE per Maturity
+
 ## train
 yields_rmse(lstm_stacked,X_train,y_train)
 
 ##test
 yields_rmse(lstm_stacked,X_test,y_test)
 
-
-l = KerasRegressor(build_fn = stacked_LSTM,nb_features = int(X.shape[1]/time_steps),time_steps = len(times),output_dim = y.shape[1],
-                   learning_rate = 0.01,
-                    size1 = 13,
-                    size2 = 13,
-                    epochs = 200,
-                    batch_size = 50,
-                    activation1 = 'softmax',
-                    activation2 = 'softmax',
-                    activation3 = 'tanh')
-                    
-
-cv1 = cross_val_score(l,X_train,y_train,cv = cpcv,n_jobs = 3)
-
-
-## bidirectional LSTM
+# =============================================================================
+# bidirectional LSTM
+# =============================================================================
 
 # Create a KerasRegressor
 lstm3 = KerasRegressor(build_fn = bi_LSTM)
@@ -205,7 +194,7 @@ random_search3.fit(X_train,y_train)
 
 # results
 random_search3.best_params_
-# 1.2423955049501318e-06
+random_search3.best_score_ # 1.2423955049501318e-06
 
 ## training parameters
 learning_rate = 0.01
@@ -215,16 +204,15 @@ batch_size = 50
 activation1 = 'softmax'
 activation2 = 'linear'
 
-
 # create model
 lstm_bidirect =  bi_LSTM(time_steps,nb_features,output_dim,learning_rate,size,activation1,activation2)
 
 # checkpoint
 modelCheckpoint3 = ModelCheckpoint(filepath = model_folder + 'best_bidirectional_lstm10.hdf5',  save_best_only = True)
 
-
+# train model
 history3 = lstm_bidirect.fit(X_train, y_train,epochs = epochs, batch_size = batch_size, 
-                          validation_data=(X_test, y_test),callbacks = [modelCheckpoint3],verbose=1)
+                          validation_data=(X_test, y_test),callbacks = [modelCheckpoint3],verbose = 1)
 
 # load best model
 lstm_bidirect = load_model(model_folder + 'best_bidirectional_lstm10.hdf5')
@@ -238,26 +226,17 @@ print('test mse', results3)
 plot_rmse(history3,train_test_folder,'bidirect_train_test_RMSE 10')
 
 # RMSE per Maturity
+
 ## train
 yields_rmse(lstm_bidirect,X_train,y_train)
 
 ##test
 yields_rmse(lstm_bidirect,X_test,y_test)
 
-l = KerasRegressor(build_fn = bi_LSTM,nb_features = int(X.shape[1]/time_steps),time_steps = len(times),output_dim = y.shape[1],
-                   learning_rate = 0.01,
-                    size = 13,
-                    epochs = 200,
-                    batch_size = 50,
-                    activation1 = 'softmax',
-                    activation2 = 'linear')
-                                        
 
-cv1 = cross_val_score(l,X_train,y_train,cv = cpcv,n_jobs = 3)
-
-
-
-## yields predictions plots 
+# =============================================================================
+# yields predictions plots 
+# =============================================================================
 
 plot_yields(lstm_vanilla,X_test,y_test0,predictions_folder,'vanilla 10')
 plot_yields(lstm_stacked,X_test,y_test0,predictions_folder,'stacked 10')
