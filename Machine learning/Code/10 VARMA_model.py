@@ -13,8 +13,8 @@ import statsmodels.api as sm
 from statsmodels.tsa import stattools
 from statsmodels.tsa.vector_ar.var_model import VAR
 
-#path = 'D:/GitHub/ML_For_Finance/Machine learning/Data' #coco desktop
-path = 'D:/GitHub/ML for Finance project/ML_For_Finance/Machine learning/Data' #coco laptop
+path = 'D:/GitHub/ML_For_Finance/Machine learning/Data' #coco desktop
+#path = 'D:/GitHub/ML for Finance project/ML_For_Finance/Machine learning/Data' #coco laptop
 
 df = pd.read_csv(path+'/data_clean.csv',sep = ","
                  ,parse_dates = True,index_col = 0 )
@@ -125,7 +125,7 @@ for i in range(len(index_test5)):
 X_pred5 = pd.DataFrame(data= X_pred5,columns=names,index=index_test5)  
     
 
-path_fig='D:/GitHub/ML for Finance project/ML_For_Finance/Machine learning/Code/figures/'
+#path_fig='D:/GitHub/ML for Finance project/ML_For_Finance/Machine learning/Code/figures/'
 
 for nom in names:
         plt.plot(index,X_day[nom],label='True '+ nom)
@@ -133,7 +133,7 @@ for nom in names:
         plt.plot(index_test5,X_pred5[nom],label='predict 5 day after'+ nom )
         plt.legend()
         plt.title('forcast VARIX(6,1) ' + nom)
-        plt.savefig(path_fig+'VARIX/forcast_of_VARIX(6,1)_'+nom+'.pdf')
+        #plt.savefig(path_fig+'VARIX/forcast_of_VARIX(6,1)_'+nom+'.pdf')
         plt.show()
     
     
@@ -165,7 +165,7 @@ for nom in names:
         plt.plot(X_pred5.index,X_pred5[nom],label='predict 5 day after'+ nom )
         plt.legend()
         plt.title('forcast VARIX(2,0) ' + nom)
-        plt.savefig(path_fig+'VARIX/forcast of VARIX(2,0) '+nom+'.pdf')
+        #plt.savefig(path_fig+'VARIX/forcast of VARIX(2,0) '+nom+'.pdf')
         plt.show()
     
 temp1 = (X_day.loc[X_pred1.index]-X_pred1)**2
@@ -192,5 +192,33 @@ RMSE = pd.DataFrame(data=[RMSE_1_d1.values,RMSE_5_d1.values,RMSE_1_d0.values,RMS
 
 
 print(RMSE.to_latex()) 
+
+
+
+
+
+MSE_0_1_5 = np.mean((X_day.loc[X_pred5.index]-X_pred5)**2)
+print(np.sqrt(MSE_0_1_5))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
