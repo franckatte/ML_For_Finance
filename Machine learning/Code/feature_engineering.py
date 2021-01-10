@@ -6,14 +6,9 @@ Created on Tue Dec  1 20:08:01 2020
 @author: franckatteaka
 """
 
-
-
 import pandas as pd
 import numpy as np
 from keras.models import load_model
-
-#df = pd.read_csv('/Users/franckatteaka/Desktop/cours/Semester III/Courses Projects/Machine Learning/Data/data_clean.csv',sep = ","
-#                 ,parse_dates = True,index_col = 0 )
 
 
 def sub_range(df,nb_years = None):
@@ -72,6 +67,22 @@ def lag(df,lags,col, drop = True):
         
     
 def rolling_growth(df,freqs,col, drop = True):
+    '''
+        compute rolling growth rates
+        
+         parameters
+        ------------
+        df(pandas df): dataframe economic variable and yields 
+        feqs (list): list of the number of days for the rolling growths
+        col(str): name column of interest
+        drop(bool): True to keep only the rolling growth and drop initial column
+        
+        Return
+        ------------
+        df(pandas df)
+    '''
+    
+    
     
     df2 = df.copy()
     
@@ -87,6 +98,19 @@ def rolling_growth(df,freqs,col, drop = True):
 
 
 def denoiser(df,backwards,model_path):
+    '''
+        denoise the yieds
+        
+         parameters
+        ------------
+        df(pandas df): dataframe economic variable and yields 
+        backwards(list): days between target variables and observed data used to predict
+        model_path(str): path of the keras denoising autoencoder
+        
+        Return
+        ------------
+        df(pandas df)
+    '''
     
     autoencoder = load_model(model_path)
     df2 = df.iloc[:,df.columns.str.contains('J')].copy()
@@ -113,6 +137,7 @@ def supervised(df,growth_freqs,backwards,denoise = True,model_path = None,scale_
         denoise(Bool): True if we want to denoise the yields
         model_path(str): path of the keras denoising model 
         scale_eco(Bool): True if we want the economic variables to be scaled
+        
         Return
         ------------
         (X,y) df(pandas df): regressors, target

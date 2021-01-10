@@ -71,6 +71,20 @@ def test_groups(train_groups,groups_ids):
 
 
 def CPCV(X,n_split,n_folds,purge):
+    '''
+        return cpcv indexes
+        
+        parameters
+        ------------
+        X(pandas df): regressors
+        n_split: number of splits
+        n_folds: number of folder for the train set
+        purge: number of purging days 
+        
+        Return
+        ------------
+        resutls: list of testing  and training observations indexes
+    '''
     
     X2 = X.copy()
  
