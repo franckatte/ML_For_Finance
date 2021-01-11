@@ -78,7 +78,7 @@ def get_Louvain_GMVP(data_harmonized):
     data_harmosized : Pandas data Frame of harmonized asset
         
 
-    Returns weight and performance and label_clustering
+    Returns weight and performances and label_clustering
     -------
 
     '''
@@ -102,7 +102,6 @@ def get_Louvain_GMVP(data_harmonized):
         datai = data_harmonized[nom]
         wi,_,_ = get_GMVP(datai)
         
-        
         WI = pd.DataFrame(data=wi[np.newaxis,:],columns=nom,index=['weight'])
         
         weight_louvain.append(WI)
@@ -115,7 +114,7 @@ def get_Louvain_GMVP(data_harmonized):
     #We compute the dataframe for the value of each cluster
     Value_cluster = np.array(Value_cluster).T
     Data_cluster = pd.DataFrame(data = Value_cluster,columns=names_cluster,index=date)
-        
+    #We compute GMVP in using the cluster values
     w_clust,mu_cluster,std_cluster = get_GMVP(Data_cluster)
     return w_clust,mu_cluster,std_cluster,Cluster,weight_louvain,C
         
@@ -160,7 +159,7 @@ class Louvain_GMVP :
         
 
 '''
-
+TEST
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
