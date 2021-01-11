@@ -11,18 +11,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-from data_cleaning import load_trade
+from data_cleaning import load_trade,impor_data
 from refreshTime import harmoniz_data
 from GMVP import get_GMVP,Louvain_GMVP,get_return_vanilla
 import dask
+
     
     
-    
-def impor_data(market_name,day,path):
-    #We creat a list to import the data
-    sortie = [load_trade(market,day,path,is_compressed=True) for market in market_name]
-    return dask.compute(sortie)[0]
-    
+
 
 def nombre_cluster(louvain,df):
     #We add one unit where two assets are in the same cluster
