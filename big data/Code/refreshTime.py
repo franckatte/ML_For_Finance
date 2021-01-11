@@ -19,6 +19,7 @@ def test_date(dates):
     
     return 0 in a
 
+#This function get the refresh time without dask
 def refresh_time_without_dask(dfs):
     '''
         return list of refresh times 
@@ -43,9 +44,9 @@ def refresh_time_without_dask(dfs):
         #update dates
         dates = np.array([date[np.where(date > tau[-1])[0]] for date in dates ],dtype=object)
         
-        
     return tau
 
+#This function is the same as above but with 'dask deplayed'
 @dask.delayed
 def refresh_time(dfs):
     '''
@@ -74,14 +75,15 @@ def refresh_time(dfs):
         
     return tau
 
-
+#This function will use the above function to compute the refresh time faster
 def refresh_time_dask(dfs,date):
     
-    
+    #First we set the sets where we search refresh times
     d = date.strftime('%Y/%m/%d')
     d_range_dep=pd.date_range(start=d+" 09:30:00",end=d+" 15:30:00",freq='30T',tz ="America/New_York" )
     d_range_en =  pd.date_range(start=d+" 10:10:00",end=d+" 16:10:00",freq='30T',tz ="America/New_York" )
     
+    #For the different set we compute using dask
     n= len(d_range_dep)
     tau_total=[]
     for i in range(n):
@@ -93,13 +95,14 @@ def refresh_time_dask(dfs,date):
         
         
     tau_t=dask.compute(tau_total)[0]
-    
+    #Then to put together all sets we need to delete the double and the false refresh times
     limit_d = pd.date_range(start=d+" 10:10:00",end=d+" 15:40:00",freq='30T',tz ="America/New_York" )
     tau_t2=[tau_t[0]]
     for j in range(len(limit_d)):
+        #We delete the refresh time found in the first 10min for all sets except the first one
         index = [limit_d[j]<tau_t[j+1][i] for i in range(len(tau_t[j+1]))]
         tau_t2.append(np.array(tau_t[j+1])[index])
-    
+    #We concatenate all refresh time and make sur to not have doubles
     tau = np.concatenate(tau_t2,axis=0)
     tau = np.unique(tau)
     return tau
@@ -110,7 +113,7 @@ def refresh_time_dask(dfs,date):
 
 
 
-
+#This function resample the data from the refresh times obtain for one market
 @dask.delayed
 def  resample(df,r_times):
     
@@ -129,7 +132,7 @@ def  resample(df,r_times):
  
     
  
-    
+#This function use dask to resample all markets at the same time
 def synchro_data(dfs,date):
     '''
         return DataFrame of synchronise data
@@ -151,7 +154,7 @@ def synchro_data(dfs,date):
     
     return dask.compute(res)[0]
         
-    
+
 def harmoniz_data(dfs,date):
     '''
         Concatenate the list of DataFrame from 'synchro_data'
@@ -175,7 +178,7 @@ def harmoniz_data(dfs,date):
     
     
 '''
-    
+TEST    
  #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
