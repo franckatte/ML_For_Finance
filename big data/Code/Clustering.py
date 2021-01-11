@@ -18,7 +18,8 @@ import matplotlib.pyplot as plt
 from sknetwork.clustering import Louvain
 
 
-
+#This function put 0 on the diagonal of the matrix
+#We do that to avoid self loop on our network
 def zero_diag_matrix(M):
     #We put zeros on the matrix diagonal
     n=len(M)
@@ -94,7 +95,7 @@ def get_clusters(C,q):
     
     # We compute the filtered correlation matrix
     C0 = C_random+C_market
-    
+    #we do the absolute to be sure that all weight are positive
     C0=np.absolute(C0)
     
     cluster = louvain_label(C0)
