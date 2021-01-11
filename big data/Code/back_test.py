@@ -41,18 +41,18 @@ def nombre_cluster(louvain,df):
     
 class daily_back_testing :
     
-    def __init__(self,market_name,path,list_day0):
+    def __init__(self,stock_name,path,list_day0):
         #we initialize the value of each strategy
         self.V_vanilla=[100]
         self.V_louvain=[100]
         
         self.number_cluster=[]
         #we save the different day we use and the personal path to get the data and the market name
-        #self.date_path=[day0]
+        
         self.date_path=[list_day0[-1]]
         self.path_perso=path
-        self.market_name=market_name
-        n=len(market_name)
+        self.stock_name=stock_name
+        n=len(stock_name)
         #We create a list to save the return of each strategy
         self.louvain_return=[]
         self.vanilla_return=[]
@@ -60,14 +60,14 @@ class daily_back_testing :
         self.correlation=np.zeros((n,n))
         #we create a matrix to know how many time each asset are together in louvain cluster
         temp1= np.zeros((n,n))
-        self.louvain_cluster =pd.DataFrame(data=temp1,columns=market_name,index=market_name)
+        self.louvain_cluster =pd.DataFrame(data=temp1,columns=stock_name,index=stock_name)
         #we initialize the number of time we will calculate the different return/strategy value ...
         self.nombre_test=0
         #we import the first data
-        #self.data_j1=impor_data(market_name,day0,path)
+        
         self.data_1 = []
         for d in list_day0 :
-            temp1 = impor_data(market_name,d,path)
+            temp1 = impor_data(stock_name,d,path)
             if min([len(df) for df in temp1])>0: 
                 self.data_1.append(harmoniz_data(temp1,d))
         
@@ -87,17 +87,17 @@ class daily_back_testing :
         '''
         
         #we import the data of the day 2 and make sure it is not empty
-        data_j2 = impor_data(self.market_name,day_j,self.path_perso)
+        data_j2 = impor_data(self.stock_name,day_j,self.path_perso)
         
         if min([len(df) for df in data_j2])>0:  
             #we resample the stocked data and calibrate the strategies on it
-            #data_harmonized_j1 = harmoniz_data(self.data_j1)
+            
             
             data_calibrate = pd.concat(self.data_1,axis=0)
             #we calibrate the Louvain strategy and calcul the return and actualize 
             #the correlation matrix and the number of time assets are in the same cluster
             louvain = Louvain_GMVP(data_calibrate)
-            louvain.get_return(data_j2,self.market_name)
+            louvain.get_return(data_j2,self.stock_name)
             self.number_cluster.append(max(louvain.label)+1)
             self.louvain_return.append(louvain.retour)
             self.V_louvain.append(self.V_louvain[-1]* (1+louvain.retour))
