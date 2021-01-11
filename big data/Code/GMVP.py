@@ -17,7 +17,6 @@ def minimize_portfolio(w,Sigma):
 
 def get_GMVP(data_harmonized):
     '''
-    
 
     function to caculate the GMVP
     ----------
@@ -27,6 +26,7 @@ def get_GMVP(data_harmonized):
     -------
 
     '''
+    #We use a minimisation fonction to avoid any errors from the inversion of the matrix
     #We compute the different return of each asset for each refresh time and get its covariance
     return_data = (data_harmonized- data_harmonized.shift(1))/(data_harmonized.shift(1))
     return_data=return_data.dropna()
@@ -35,12 +35,12 @@ def get_GMVP(data_harmonized):
     Covariance = return_data.cov()
     
     #We compute the constrainte that the sum of the weight is 1 and then calculate te portfolio
-    cons = ({'type': 'eq', 'fun': lambda x:  np.sum(x)-1.0})
-    n=len(Covariance)
-    w0 = np.ones(n)/n
-    res= minimize(minimize_portfolio, w0, args=Covariance, method='SLSQP',constraints=cons)
+    #cons = ({'type': 'eq', 'fun': lambda x:  np.sum(x)-1.0})
+    #n=len(Covariance)
+    #w0 = np.ones(n)/n
+    #res= minimize(minimize_portfolio, w0, args=Covariance, method='SLSQP',constraints=cons)
     
-    w = res.x
+    w = np.linalg.inv(Covariance)@np.ones(len(Covariance))
     
     #We compute the mean and std or the calculated portfolio
     mean = np.mean(return_data,axis=0)@w
