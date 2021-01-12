@@ -11,9 +11,6 @@ import numpy as np
 from scipy.optimize import minimize
 from Clustering import get_clusters
 
-def minimize_portfolio(w,Sigma):
-    #Fonction to minimize to get GMVP
-    return w.T@Sigma@w
 
 def get_GMVP(data_harmonized):
     '''
@@ -34,11 +31,8 @@ def get_GMVP(data_harmonized):
     
     Covariance = return_data.cov()
     
-    #We compute the constrainte that the sum of the weight is 1 and then calculate te portfolio
-    #cons = ({'type': 'eq', 'fun': lambda x:  np.sum(x)-1.0})
-    #n=len(Covariance)
-    #w0 = np.ones(n)/n
-    #res= minimize(minimize_portfolio, w0, args=Covariance, method='SLSQP',constraints=cons)
+    #We compute the analycal solution of the GMVP
+    
     
     w = np.linalg.inv(Covariance)@np.ones(len(Covariance))
     
