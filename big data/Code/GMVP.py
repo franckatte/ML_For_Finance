@@ -33,8 +33,9 @@ def get_GMVP(data_harmonized):
     
     #We compute the analycal solution of the GMVP
     
-    
-    w = np.linalg.inv(Covariance)@np.ones(len(Covariance))
+    n=len(Covariance)
+    inv = np.linalg.inv(Covariance)
+    w = inv@np.ones(n) /(np.ones(n).T@inv@np.ones(n))
     
     #We compute the mean and std or the calculated portfolio
     mean = np.mean(return_data,axis=0)@w
