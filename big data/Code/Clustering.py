@@ -10,8 +10,7 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 import community as community_louvain
-import matplotlib.cm as cm
-import matplotlib.pyplot as plt
+
 
 #pip install scikit-network
 
@@ -19,7 +18,7 @@ from sknetwork.clustering import Louvain
 
 
 #This function put 0 on the diagonal of the matrix
-#We do that to avoid self loop on our network
+
 def zero_diag_matrix(M):
     #We put zeros on the matrix diagonal
     n=len(M)
@@ -34,7 +33,7 @@ def louvain_label(corr_matrix):
     '''
         return label of Louvain clustering
         ------------
-        corr_matrix(numpy): correlation matrix of the market array
+        corr_matrix(numpy): correlation matrix of the return
         
         Return
         ------------
@@ -72,7 +71,6 @@ def get_clusters(C,q):
 
     '''
     
-    names = C.columns
     #We define the theoritical limite of the correlation
     lbda_p = (1 + np.sqrt(q))**2
     lbda_m = (1 - np.sqrt(q))**2
