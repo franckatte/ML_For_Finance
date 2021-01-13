@@ -13,13 +13,13 @@ dask.config.set(scheduler="processes")
 
 
 def test_date(dates):
-    '''test wether one of the dates list is empty'''
+    '''test whether one of the dates list is empty'''
     
     a = [len(date) for date in dates]
     
     return 0 in a
 
-#This function get the refresh time without dask
+#This function get the refresh times without dask
 def refresh_time_without_dask(dfs):
     '''
         return list of refresh times 
@@ -46,7 +46,7 @@ def refresh_time_without_dask(dfs):
         
     return tau
 
-#This function is the same as above but with 'dask deplayed'
+#This function is the same as above but with 'dask delayed'
 @dask.delayed
 def refresh_time(dfs):
     '''
@@ -75,7 +75,7 @@ def refresh_time(dfs):
         
     return tau
 
-#This function will use the above function to compute the refresh time faster
+#This function will use the above function to compute the refresh times faster
 def refresh_time_dask(dfs,date):
     
     #First we set the sets where we search refresh times
@@ -178,7 +178,8 @@ def harmoniz_data(dfs,date):
     
     
 '''
-TEST    
+TEST 
+   
  #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
