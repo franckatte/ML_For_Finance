@@ -22,7 +22,7 @@ import dask
 
 def nombre_cluster(louvain,df):
     #We add one unit where two assets are in the same cluster
-    #df is the matrix where row and columns the asset and each number, the number of time where the two assets are in the same cluster
+    #df is the matrix where row and columns the asset , we add a 1 when two assets are in the same cluster (similar to adjency matrtix)
     market_name=df.columns
     n=len(market_name)
     
@@ -47,7 +47,7 @@ class daily_back_testing :
         self.V_louvain=[100]
         
         self.number_cluster=[]
-        #we save the different day we use and the personal path to get the data and the market name
+        #we save the different days we will backtest the strategy, the personal data path and the assets names
         
         self.date_path=[list_day0[-1]]
         self.path_perso=path
@@ -56,14 +56,14 @@ class daily_back_testing :
         #We create a list to save the return of each strategy
         self.louvain_return=[]
         self.vanilla_return=[]
-        #We initialize the correlation matrix (goal to get the average correlation between each asset)
+        #We initialize the correlation matrix (the average correlation between each asset)
         self.correlation=np.zeros((n,n))
         #we create a matrix to know how many time each asset are together in louvain cluster
         temp1= np.zeros((n,n))
         self.louvain_cluster =pd.DataFrame(data=temp1,columns=stock_name,index=stock_name)
-        #we initialize the number of time we will calculate the different return/strategy value ...
+        #we initialize the number of update days
         self.nombre_test=0
-        #we import the first data
+        #we import the data for the initialisation of the cluster and portfolios weights
         
         self.data_1 = []
         for d in list_day0 :
@@ -78,7 +78,7 @@ class daily_back_testing :
 
         Parameters
         ----------
-        day_j : date of the day where we want to apply the stategy calibrate on the previous day 
+        day_j : date of the day where we want to apply the calibrated stategy
 
         Returns
         -------
@@ -90,11 +90,11 @@ class daily_back_testing :
         data_j2 = impor_data(self.stock_name,day_j,self.path_perso)
         
         if min([len(df) for df in data_j2])>0:  
-            #we resample the stocked data and calibrate the strategies on it
+            #we concatenate the save synchronised data
             
             
             data_calibrate = pd.concat(self.data_1,axis=0)
-            #we calibrate the Louvain strategy and calcul the return and actualize 
+            #we calibrate the Louvain strategy weights and compute the return and actualize 
             #the correlation matrix and the number of time assets are in the same cluster
             louvain = Louvain_GMVP(data_calibrate)
             louvain.get_return(data_j2,self.stock_name)
@@ -107,12 +107,12 @@ class daily_back_testing :
             #we add one unit in the number of test
             self.nombre_test+=1
             
-            #we calibrate the vanilla strategy and get the return
+            #we calibrate the standard strategy and get the return
             vanilla_w,_,_ = get_GMVP(data_calibrate)
             self.vanilla_return.append(get_return_vanilla(vanilla_w,data_j2))
             self.V_vanilla.append(self.V_vanilla[-1]*(1+self.vanilla_return[-1]) )
             
-            #we replace the a old data day 1 with the data from day 2 to calibrate the future strategy
+            #we update the calibration period deleting the first day of the calibration period and adding the synchronised data of the next trading day 
             self.date_path.append(day_j)
             temp=harmoniz_data(data_j2,day_j)
             del self.data_1[0]
