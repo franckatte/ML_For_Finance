@@ -82,7 +82,9 @@ def get_Louvain_GMVP(data_harmonized):
     names = data_harmonized.columns
     date = data_harmonized.index
     q = len(names)/len(date)
-    C = data_harmonized.corr()
+    #C = data_harmonized.corr()
+    temp = np.log((data_harmonized- data_harmonized.shift(1))/(data_harmonized.shift(1)))
+    C= temp.corr()
     
     Cluster = get_clusters(C,q)
     
